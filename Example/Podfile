@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'FACropPhoto_Example' do
+  pod 'FACropPhoto', :path => '../'
+
+  target 'FACropPhoto_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
