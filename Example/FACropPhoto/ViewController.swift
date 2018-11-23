@@ -23,7 +23,12 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-//        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:)))
+        if let cropVC = self.cropVC {
+            
+            let image = cropVC.createCroppedImage()
+
+            print("Crop image: \(image)")
+        }
         
         if let image = UIImage(named: "img") {
             

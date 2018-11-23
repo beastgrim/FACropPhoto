@@ -72,6 +72,29 @@ extension CGRect {
     func scaleToFit(to size: CGSize) -> CGFloat {
         return self.size.scaleToFit(to: size)
     }
+    
+    func appliedImageOrientation(_ imageOrientation: UIImage.Orientation, with imageSize: CGSize) -> CGRect {
+        
+        var rect = self
+        switch imageOrientation {
+        case .up,.upMirrored: break
+
+        case .right,.rightMirrored:
+            let size = CGSize(width: rect.size.height, height: rect.size.width)
+            let origin = CGPoint(x: rect.origin.y, y: imageSize.width - rect.maxX)
+            rect = CGRect(origin: origin, size: size)
+        case .left,.leftMirrored:
+            let size = CGSize(width: rect.size.height, height: rect.size.width)
+            let origin = CGPoint(x: imageSize.height - rect.maxY, y: rect.origin.x)
+            rect = CGRect(origin: origin, size: size)
+        case .down,.downMirrored:
+            let size = rect.size
+            let origin = CGPoint(x: imageSize.width - rect.maxX, y: imageSize.height - rect.maxY)
+            rect = CGRect(origin: origin, size: size)
+        }
+        
+        return rect
+    }
 }
 
 extension CGSize {

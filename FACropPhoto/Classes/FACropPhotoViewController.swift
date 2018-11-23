@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import os.log
 
 public enum FACropAspectRatio {
     case original
@@ -31,6 +32,34 @@ public class FACropPhotoViewController: UIViewController {
     private(set) var scrollView: UIScrollView!
     private(set) var imageView: UIImageView!
     private(set) var cropControl: FACropControl!
+    public var imageCropRect: CGRect {
+        
+        let scale = self.image.scale
+        var fullRect = CGRect(origin: .zero, size: self.image.size)
+        fullRect.size.width *= scale
+        fullRect.size.height *= scale
+        
+        guard self.isViewLoaded else {
+  
+            return fullRect
+        }
+        
+        let inset = self.scrollView.contentInset
+        let zoomScale = self.scrollView.zoomScale/self.image.scale
+        var imagePoint = self.scrollView.contentOffset
+        imagePoint.x += inset.left
+        imagePoint.y += inset.top
+        imagePoint.x /= zoomScale
+        imagePoint.y /= zoomScale
+        
+        var imageSize = self.viewState.cropControlFrame.size
+        imageSize.width /= zoomScale
+        imageSize.height /= zoomScale
+        
+        let cropRect = CGRect(origin: imagePoint, size: imageSize)
+        
+        return cropRect
+    }
 
     
     // MARK: - Life Cycle
@@ -222,6 +251,46 @@ public class FACropPhotoViewController: UIViewController {
         } else {
             doBlock()
         }
+    }
+    
+    public func createCroppedImage() -> UIImage {
+        
+        let cropRect = self.imageCropRect
+        
+        if let cgImage = self.image.cgImage {
+            let orientation = self.image.imageOrientation
+            let scale = self.image.scale
+            var fullRect = CGRect(origin: .zero, size: self.image.size)
+            fullRect.size.width *= scale
+            fullRect.size.height *= scale
+            // Apply orientation
+            let cgCropRect = cropRect.appliedImageOrientation(orientation, with: fullRect.size)
+            
+            if let cropped = cgImage.cropping(to: cgCropRect) {
+                let croppedImage = UIImage(cgImage: cropped,
+                                           scale: self.image.scale,
+                                           orientation: self.image.imageOrientation)
+                return croppedImage
+            }
+        } else if let ciImage = self.image.ciImage {
+            // Convert to another coordinate system (0,0) -> bottom,left
+            var ciCropRect = cropRect
+            ciCropRect.origin.y = ciImage.extent.height - cropRect.maxY
+            
+            if let cgImage = CIContext().createCGImage(ciImage, from: ciCropRect) {
+                let croppedImage = UIImage(cgImage: cgImage,
+                                           scale: self.image.scale,
+                                           orientation: self.image.imageOrientation)
+                
+                return croppedImage
+            }
+        } else {
+            if #available(iOS 10.0, *) {
+                os_log("[ERROR] %@: Image not supported: %@", #function, self.image)
+            }
+        }
+        
+        return self.image
     }
 
     
