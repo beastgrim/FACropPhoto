@@ -7,14 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */; };
+		5CDCFBE221A6AF5700DD97AB /* FACropPhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */; };
+		5CDCFBE321A6AF5700DD97AB /* CGRect+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */; };
+		5CDCFBE521A6B5B300DD97AB /* FARotationControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBE421A6B5B300DD97AB /* FARotationControl.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
-		6475ED2C5B633FE313AD8FAC /* Pods_FACropPhoto_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C211396DE160756389C5FAF /* Pods_FACropPhoto_Tests.framework */; };
-		A5AF9D7BC822E5AAD7FA8D06 /* Pods_FACropPhoto_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCBFE0ED0E60BCE213BFBDE5 /* Pods_FACropPhoto_Example.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,10 +30,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		09B5A5100A526CA13695E15B /* Pods-FACropPhoto_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FACropPhoto_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FACropPhoto_Example/Pods-FACropPhoto_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		3E6ACDE62F908B695F64572A /* Pods-FACropPhoto_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FACropPhoto_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-FACropPhoto_Example/Pods-FACropPhoto_Example.release.xcconfig"; sourceTree = "<group>"; };
-		4331CC432BFC3D774E0CABEC /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
-		5C211396DE160756389C5FAF /* Pods_FACropPhoto_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FACropPhoto_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4331CC432BFC3D774E0CABEC /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropControl.swift; sourceTree = "<group>"; };
+		5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropPhotoViewController.swift; sourceTree = "<group>"; };
+		5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGRect+Helpers.swift"; sourceTree = "<group>"; };
+		5CDCFBE421A6B5B300DD97AB /* FARotationControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FARotationControl.swift; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* FACropPhoto_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FACropPhoto_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -42,11 +45,8 @@
 		607FACE51AFB9204008FA782 /* FACropPhoto_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FACropPhoto_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
-		83E95F6668A8EC21C0FEB6AF /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		A3DDD988E9CF121EC9BB7BD3 /* FACropPhoto.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = FACropPhoto.podspec; path = ../FACropPhoto.podspec; sourceTree = "<group>"; };
-		BCBFE0ED0E60BCE213BFBDE5 /* Pods_FACropPhoto_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FACropPhoto_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F31C0C6EFBBF1E403DA2652D /* Pods-FACropPhoto_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FACropPhoto_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-FACropPhoto_Tests/Pods-FACropPhoto_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		F3CDF462D516BE464D74BE46 /* Pods-FACropPhoto_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FACropPhoto_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FACropPhoto_Tests/Pods-FACropPhoto_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		83E95F6668A8EC21C0FEB6AF /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		A3DDD988E9CF121EC9BB7BD3 /* FACropPhoto.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = FACropPhoto.podspec; path = ../FACropPhoto.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,7 +54,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A5AF9D7BC822E5AAD7FA8D06 /* Pods_FACropPhoto_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,13 +61,24 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6475ED2C5B633FE313AD8FAC /* Pods_FACropPhoto_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5CDCFBDB21A6AF5700DD97AB /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */,
+				5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */,
+				5CDCFBE421A6B5B300DD97AB /* FARotationControl.swift */,
+				5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */,
+			);
+			name = Classes;
+			path = ../../FACropPhoto/Classes;
+			sourceTree = "<group>";
+		};
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
@@ -76,8 +86,6 @@
 				607FACD21AFB9204008FA782 /* Example for FACropPhoto */,
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
-				67BC9AA6AF375AF92C0C04E8 /* Pods */,
-				F14B7BBBE9E0DDA28FD64DF9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -94,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
+				5CDCFBDB21A6AF5700DD97AB /* Classes */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
@@ -139,26 +148,6 @@
 			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
-		67BC9AA6AF375AF92C0C04E8 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				09B5A5100A526CA13695E15B /* Pods-FACropPhoto_Example.debug.xcconfig */,
-				3E6ACDE62F908B695F64572A /* Pods-FACropPhoto_Example.release.xcconfig */,
-				F3CDF462D516BE464D74BE46 /* Pods-FACropPhoto_Tests.debug.xcconfig */,
-				F31C0C6EFBBF1E403DA2652D /* Pods-FACropPhoto_Tests.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
-		F14B7BBBE9E0DDA28FD64DF9 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				BCBFE0ED0E60BCE213BFBDE5 /* Pods_FACropPhoto_Example.framework */,
-				5C211396DE160756389C5FAF /* Pods_FACropPhoto_Tests.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -166,11 +155,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "FACropPhoto_Example" */;
 			buildPhases = (
-				83A7B67BC8C1C1E3B135042A /* [CP] Check Pods Manifest.lock */,
 				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
-				CCB1E67EB705DFD64056C5AB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -185,7 +172,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "FACropPhoto_Tests" */;
 			buildPhases = (
-				12A8F33354412443CE1A45CB /* [CP] Check Pods Manifest.lock */,
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
@@ -206,12 +192,14 @@
 		607FACC81AFB9204008FA782 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = FA;
 				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 0830;
-				ORGANIZATIONNAME = CocoaPods;
+				ORGANIZATIONNAME = FaceApp;
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = 6Y3Y8F2CKP;
 						LastSwiftMigration = 0900;
 					};
 					607FACE41AFB9204008FA782 = {
@@ -260,81 +248,16 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		12A8F33354412443CE1A45CB /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-FACropPhoto_Tests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		83A7B67BC8C1C1E3B135042A /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-FACropPhoto_Example-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		CCB1E67EB705DFD64056C5AB /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-FACropPhoto_Example/Pods-FACropPhoto_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/FACropPhoto/FACropPhoto.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FACropPhoto.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-FACropPhoto_Example/Pods-FACropPhoto_Example-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		607FACCC1AFB9204008FA782 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CDCFBE321A6AF5700DD97AB /* CGRect+Helpers.swift in Sources */,
+				5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
+				5CDCFBE221A6AF5700DD97AB /* FACropPhotoViewController.swift in Sources */,
+				5CDCFBE521A6B5B300DD97AB /* FARotationControl.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -478,13 +401,15 @@
 		};
 		607FACF01AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 09B5A5100A526CA13695E15B /* Pods-FACropPhoto_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 6Y3Y8F2CKP;
 				INFOPLIST_FILE = FACropPhoto/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fa.FACropPhoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
@@ -493,13 +418,15 @@
 		};
 		607FACF11AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3E6ACDE62F908B695F64572A /* Pods-FACropPhoto_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 6Y3Y8F2CKP;
 				INFOPLIST_FILE = FACropPhoto/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fa.FACropPhoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
 				SWIFT_VERSION = 4.0;
@@ -508,7 +435,6 @@
 		};
 		607FACF31AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F3CDF462D516BE464D74BE46 /* Pods-FACropPhoto_Tests.debug.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -530,7 +456,6 @@
 		};
 		607FACF41AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F31C0C6EFBBF1E403DA2652D /* Pods-FACropPhoto_Tests.release.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",

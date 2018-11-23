@@ -1,5 +1,5 @@
 import XCTest
-import FACropPhoto
+//import FACropPhoto
 
 class Tests: XCTestCase {
     
