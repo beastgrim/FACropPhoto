@@ -12,37 +12,29 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    weak var cropVC: FACropPhotoViewController?
+    var cropVC: FACropPhotoViewController?
+    weak var imageView: UIImageView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
     
         self.view.backgroundColor = .white
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
         
-        if let cropVC = self.cropVC {
-            
-            let image = cropVC.createCroppedImage()
-
-            print("Crop image: \(image)")
-        }
+        let imageView = UIImageView(frame: self.view.bounds)
+        imageView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        imageView.contentMode = .scaleAspectFit
+        self.view.addSubview(imageView)
+        self.imageView = imageView
         
-        if let image = UIImage(named: "img") {
-            
-            let vc = FACropPhotoViewController(image: image)
-            vc.navigationItem.rightBarButtonItems  = [
-                UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),
-                UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(align(_:)))]
-            self.navigationController?.pushViewController(vc, animated: true)
-//            self.present(vc, animated: true, completion: nil)
-            self.cropVC = vc
-        }
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editAction(_:)))
     }
     
     @objc func dismissAction(_ sender: Any?) {
+        let isCropped = self.cropVC!.isCropped
+        print("Is cropped: \(isCropped)")
+        
+        self.cropVC?.navigationController?.popViewController(animated: true)
+        self.imageView?.image = self.cropVC?.createCroppedImage()
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -58,6 +50,26 @@ class ViewController: UIViewController {
     
     @objc func align(_ sender: Any?) {
         self.cropVC?.resetCropping(animated: true)
+    }
+    
+    @objc func editAction(_ sender: Any?) {
+        
+        if let image = UIImage(named: "img") {
+            
+            let ciImage = CIImage(image: image)!
+            let image = UIImage(ciImage: ciImage)
+            
+            var options = FACropPhotoOptions()
+            options.showControls = true
+            options.controlsHeight = 44.0
+            let vc = self.cropVC ?? FACropPhotoViewController(image: image, options: options)
+            vc.navigationItem.rightBarButtonItems  = [
+                UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),
+                UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(align(_:)))]
+            self.navigationController?.pushViewController(vc, animated: true)
+            vc.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissAction(_:)))
+            self.cropVC = vc
+        }
     }
 
 }

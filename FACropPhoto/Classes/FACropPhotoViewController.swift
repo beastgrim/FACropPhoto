@@ -13,6 +13,20 @@ public enum FACropAspectRatio {
     case industry(_ ration: AspectRatio)
 }
 
+public struct FACropPhotoOptions {
+    public var showControls: Bool
+    public var controlsHeight: CGFloat
+    
+    public init() {
+        self.showControls = false
+        self.controlsHeight = 0.0
+    }
+}
+
+public protocol FACropPhotoViewControllerDelegate: NSObjectProtocol {
+    func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, titleFor aspectRatio: FACropAspectRatio) -> String
+}
+
 public class FACropPhotoViewController: UIViewController {
     
     struct ViewState {
@@ -41,7 +55,10 @@ public class FACropPhotoViewController: UIViewController {
     }
     
     public let image: UIImage
+    public let options: FACropPhotoOptions
+    public weak var delegate: FACropPhotoViewControllerDelegate?
     public private(set) var cropAspectRatio: FACropAspectRatio?
+    public private(set) var standartControlsView: FAStandartControlsView?
     private(set) var viewState: ViewState
     private(set) var contentView: UIView!
     private(set) var controlsContentView: UIView!
@@ -49,6 +66,7 @@ public class FACropPhotoViewController: UIViewController {
     private(set) var scrollView: UIScrollView!
     private(set) var imageView: UIImageView!
     private(set) var cropControl: FACropControl!
+    private(set) var aspectRatioControl: FAAspectRatioControl!
     public var imageCropRect: CGRect {
         
         let scale = self.image.scale
@@ -78,11 +96,25 @@ public class FACropPhotoViewController: UIViewController {
         return cropRect
     }
 
+    public var isCropped: Bool {
+        var isCropped = false
+        if let scrollView = self.scrollView {
+            isCropped = scrollView.zoomScale != scrollView.minimumZoomScale
+        }
+        let imageRatio = self.image.size.width/self.image.size.height
+        let cropSize = self.viewState.cropControlFrame.size
+        let cropRatio = cropSize.width/cropSize.height
+        isCropped = isCropped || abs(imageRatio-cropRatio) > 0.00001
+        
+        return isCropped
+    }
+    
     
     // MARK: - Life Cycle
     
-    public init(image: UIImage) {
+    public init(image: UIImage, options: FACropPhotoOptions = FACropPhotoOptions()) {
         self.image = image
+        self.options = options
         self.viewState = ViewState(scrollViewZoom: 1.0,
                                    scrollViewOffset: .zero,
                                    scrollViewSize: .zero,
@@ -105,7 +137,7 @@ public class FACropPhotoViewController: UIViewController {
         self.view.frame = self.view.frame.extendTo(minSize: CGSize(width: 240, height: 320))
         let bounds = self.view.bounds
         
-        let controlsHeight: CGFloat = Const.controlsHeight
+        let controlsHeight: CGFloat = self.options.controlsHeight
         
         let contentView = UIView(frame: bounds.croppedBy(side: controlsHeight, options: .bottom))
         contentView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
@@ -114,6 +146,7 @@ public class FACropPhotoViewController: UIViewController {
         
         let controlsView = UIView(frame: bounds.with(height: controlsHeight, options: .bottom))
         controlsView.autoresizingMask = [.flexibleWidth,.flexibleTopMargin]
+        controlsView.isHidden = !self.options.showControls
         self.view.addSubview(controlsView)
         self.controlsContentView = controlsView
     }
@@ -154,6 +187,22 @@ public class FACropPhotoViewController: UIViewController {
         cropControl.rotateView.isHidden = true
         self.contentView.addSubview(cropControl)
         self.cropControl = cropControl
+        
+        if self.options.showControls {
+            let controls = FAStandartControlsView(frame: self.controlsContentView.bounds)
+            controls.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+            controls.aspectRatioButton.addTarget(self, action: #selector(shooseAspectRatioAction(_:)), for: .touchUpInside)
+            self.controlsContentView.addSubview(controls)
+            
+            /*
+            let aspectRatioControl = FAAspectRatioControl(frame: self.controlsContentView.bounds)
+            aspectRatioControl.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+            aspectRatioControl.delegate = self
+            aspectRatioControl.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+            self.controlsContentView.addSubview(aspectRatioControl)
+            self.aspectRatioControl = aspectRatioControl
+             */
+        }
 
         scrollView.addGestureRecognizer(cropControl.panGestureRecognizer)
         cropControl.isUserInteractionEnabled = false
@@ -203,7 +252,7 @@ public class FACropPhotoViewController: UIViewController {
                 .offsetBy(dx: 0, dy: -insets.bottom)
             self.contentView.frame = self.view.bounds
                 .croppedBy(y: insets.top)
-                .croppedBy(side: insets.bottom+Const.controlsHeight, options: .bottom)
+                .croppedBy(side: insets.bottom+self.options.controlsHeight, options: .bottom)
             self.scrollView.frame = self.contentView.bounds
             self.cropControl.frame = self.scrollView.frame
             self.viewState.scrollViewSize = self.scrollView.bounds.size
@@ -230,15 +279,16 @@ public class FACropPhotoViewController: UIViewController {
     
     public func setCropAspecRatio(_ aspectRatio: FACropAspectRatio, animated: Bool = false) {
         self.cropAspectRatio = aspectRatio
-
+        var ratioValue: CGFloat
+        
         switch aspectRatio {
         case .original:
-            let ratio = self.image.size.width/self.image.size.height
-            self.cropControl?.setAspectRatio(ratio)
+            ratioValue = self.image.size.width/self.image.size.height
         case .industry(let ratio):
-            self.cropControl?.setAspectRatio(ratio, animated: true)
+            ratioValue = ratio.ratio
         }
-        self.alignCropToCenter()
+        self.cropControl?.setAspectRatio(ratioValue, animated: animated)
+        self.alignCropToCenter(animated: animated)
     }
     
     public func alignCropToCenter(animated: Bool = false) {
@@ -301,48 +351,8 @@ public class FACropPhotoViewController: UIViewController {
     
     public func createCroppedImage() -> UIImage {
         
-        if Thread.isMainThread, #available(iOS 10.0, *) {
-            os_log("[WARNING]: You should call this function in background thread!")
-        }
-        
-        let cropRect = self.imageCropRect
-        
-        if let cgImage = self.image.cgImage {
-            let orientation = self.image.imageOrientation
-            let scale = self.image.scale
-            var fullRect = CGRect(origin: .zero, size: self.image.size)
-            fullRect.size.width *= scale
-            fullRect.size.height *= scale
-            // Apply orientation
-            let cgCropRect = cropRect.appliedImageOrientation(orientation, with: fullRect.size)
-            
-            if let cropped = cgImage.cropping(to: cgCropRect) {
-                let croppedImage = UIImage(cgImage: cropped,
-                                           scale: self.image.scale,
-                                           orientation: self.image.imageOrientation)
-                return croppedImage
-            }
-        } else if let ciImage = self.image.ciImage {
-            // Convert to another coordinate system (0,0) -> bottom,left
-            var ciCropRect = cropRect
-            ciCropRect.origin.y = ciImage.extent.height - cropRect.maxY
-            
-            if let cgImage = CIContext().createCGImage(ciImage, from: ciCropRect) {
-                let croppedImage = UIImage(cgImage: cgImage,
-                                           scale: self.image.scale,
-                                           orientation: self.image.imageOrientation)
-                
-                return croppedImage
-            }
-        } else {
-            if #available(iOS 10.0, *) {
-                os_log("[ERROR] %@: Image not supported: %@", #function, self.image)
-            }
-        }
-        
-        return self.image
+        return self.image.crop(with: self.imageCropRect)
     }
-
     
     
     // MARK: - Actions
@@ -350,7 +360,7 @@ public class FACropPhotoViewController: UIViewController {
     @objc private func cropControlDidChangeValue(_ cropControl: FACropControl) {
         self.viewState.cropControlFrame = cropControl.cropFrame
 
-        self.updateUI(animated: false, options: [.crop, .inset])
+        self.updateUI(animated: false, options: [.crop, .inset, .zoom])
     }
     
     @objc private func cropControlDidChangeAngle(_ angleControl: FARotationControl) {
@@ -373,6 +383,32 @@ public class FACropPhotoViewController: UIViewController {
     @objc private func alignCropAction() {
         self.alignCropToCenter(animated: true)
         self.cropControl.setupBlur()
+    }
+    
+    @objc private func shooseAspectRatioAction(_ sender: Any?) {
+        
+        let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel, handler: nil))
+        
+        let title = self.delegate?.cropPhotoViewController(self, titleFor: .original) ??
+            NSLocalizedString("Original", comment: "")
+        
+        sheet.addAction(UIAlertAction(title: title, style: .default, handler: { [weak self] (action) in
+            self?.resetCropping(animated: true)
+        }))
+
+        AspectRatio.allCases.forEach { (ratio) in
+            let uiRatio = FACropAspectRatio.industry(ratio)
+            let title = self.delegate?.cropPhotoViewController(self, titleFor: uiRatio) ?? ratio.title
+
+            sheet.addAction(UIAlertAction(title: title, style: .default, handler: { [weak self] (action) in
+                
+                self?.setCropAspecRatio(uiRatio, animated: true)
+            }))
+        }
+        
+        self.present(sheet, animated: true, completion: nil)
     }
     
     
@@ -526,6 +562,28 @@ extension FACropPhotoViewController: FACropControlDelegate {
     
     func cropControlDidEndDragging(_ cropControl: FACropControl) {
         self.debounceAlign()
+    }
+}
+
+//MARK: - Aspect Ratio Control Delegate
+extension FACropPhotoViewController: FAAspectRatioControlDelegate {
+    
+    public func aspectRatioControl(_ aspectRatioControl: FAAspectRatioControl, cellForIndexPath indexPath: IndexPath) -> UICollectionViewCell {
+
+        let cell = aspectRatioControl.collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+        if cell.tag == 0 {
+            cell.tag += 1
+            let imageView = UIImageView(frame: cell.bounds)
+            imageView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+            imageView.tag = 1
+            cell.contentView.addSubview(imageView)
+            cell.backgroundColor = .clear
+        }
+        let imageView = cell.contentView.viewWithTag(1) as! UIImageView
+        let ratio = aspectRatioControl.ratios[indexPath.row]
+        imageView.image = UIImage.generateIcon(size: cell.bounds.size, aspectRatio: ratio)
+
+        return cell
     }
 }
 

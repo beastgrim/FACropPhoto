@@ -16,7 +16,7 @@ public enum AspectRatio: CaseIterable {
     case r5x7
     case r9x16
     
-    var ratio: CGFloat {
+    public var ratio: CGFloat {
         switch self {
         case .r1x1:
             return 1.0
@@ -32,6 +32,26 @@ public enum AspectRatio: CaseIterable {
             return 5/7
         case .r9x16:
             return 9/16
+        }
+    }
+    
+    public var title: String {
+        switch self {
+            
+        case .r1x1:
+            return "1:1"
+        case .r2x3:
+            return "2:3"
+        case .r3x5:
+            return "3:5"
+        case .r3x4:
+            return "3:4"
+        case .r4x5:
+            return "4:5"
+        case .r5x7:
+            return "5:7"
+        case .r9x16:
+            return "9:16"
         }
     }
 }
@@ -159,11 +179,11 @@ public class FACropControl: UIControl {
         self.cropMaskView.setCropRect(self.cropFrame, animated: animated)
     }
     
-    public func setAspectRatio(_ aspectRatio: AspectRatio, atCenter point: CGPoint? = nil, animated: Bool = false) {
-        self.setAspectRatio(aspectRatio.ratio, atCenter: point, animated: animated)
+    public func setAspectRatio(_ aspectRatio: AspectRatio, animated: Bool = false) {
+        self.setAspectRatio(aspectRatio.ratio, animated: animated)
     }
     
-    public func setAspectRatio(_ aspectRatio: CGFloat, atCenter point: CGPoint? = nil, animated: Bool = false) {
+    public func setAspectRatio(_ aspectRatio: CGFloat, animated: Bool = false) {
 
         let doBlock = {
             let size = self.maxCropFrame.size

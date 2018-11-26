@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import os.log
 
 
 extension UIImage {
@@ -59,4 +60,48 @@ extension UIImage {
         return image ?? UIImage()
     }
     
+    
+    public func crop(with cropRect: CGRect) -> UIImage {
+
+        if Thread.isMainThread, #available(iOS 10.0, *) {
+            os_log("[WARNING]: You should call this function in background thread!")
+        }
+        
+        let image = self
+
+        if let cgImage = image.cgImage {
+            let orientation = image.imageOrientation
+            let scale = image.scale
+            var fullRect = CGRect(origin: .zero, size: image.size)
+            fullRect.size.width *= scale
+            fullRect.size.height *= scale
+            // Apply orientation
+            let cgCropRect = cropRect.appliedImageOrientation(orientation, with: fullRect.size)
+            
+            if let cropped = cgImage.cropping(to: cgCropRect) {
+                let croppedImage = UIImage(cgImage: cropped,
+                                           scale: image.scale,
+                                           orientation: image.imageOrientation)
+                return croppedImage
+            }
+        } else if let ciImage = image.ciImage {
+            // Convert to another coordinate system (0,0) -> bottom,left
+            var ciCropRect = cropRect
+            ciCropRect.origin.y = ciImage.extent.height - cropRect.maxY
+            
+            if let cgImage = CIContext().createCGImage(ciImage, from: ciCropRect) {
+                let croppedImage = UIImage(cgImage: cgImage,
+                                           scale: image.scale,
+                                           orientation: image.imageOrientation)
+                
+                return croppedImage
+            }
+        } else {
+            if #available(iOS 10.0, *) {
+                os_log("[ERROR] %@: Image not supported: %@", #function, image)
+            }
+        }
+        
+        return image
+    }
 }
