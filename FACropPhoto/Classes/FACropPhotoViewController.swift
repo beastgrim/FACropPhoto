@@ -23,6 +23,19 @@ public class FACropPhotoViewController: UIViewController {
         var cropControlFrame: CGRect
     }
     
+    struct UpdateAction: OptionSet {
+        public let rawValue: Int
+
+        static let offset = UpdateAction(rawValue: 1<<0)
+        static let zoom =   UpdateAction(rawValue: 1<<1)
+        static let crop =   UpdateAction(rawValue: 1<<2)
+        static let size =   UpdateAction(rawValue: 1<<3)
+        static let rotate = UpdateAction(rawValue: 1<<4)
+        static let inset =  UpdateAction(rawValue: 1<<5)
+        
+        static let all: UpdateAction = [.offset, .zoom, .crop, .size, .rotate, .inset]
+    }
+    
     struct Const {
         static var controlsHeight: CGFloat = 44.0
     }
@@ -264,8 +277,6 @@ public class FACropPhotoViewController: UIViewController {
             self.viewState.scrollViewZoom = min(self.scrollView.maximumZoomScale, newScale)
             self.viewState.cropControlFrame = cropFrame
             self.updateUI(animated: animated)
-
-            self.updateScrollInsets()
             
             scrollInsets = self.scrollView.contentInset
             var offset = imagePoint
@@ -339,8 +350,7 @@ public class FACropPhotoViewController: UIViewController {
     @objc private func cropControlDidChangeValue(_ cropControl: FACropControl) {
         self.viewState.cropControlFrame = cropControl.cropFrame
 
-        self.updateScrollInsets()
-        self.updateUI()
+        self.updateUI(animated: false, options: [.crop, .inset])
     }
     
     @objc private func cropControlDidChangeAngle(_ angleControl: FARotationControl) {
@@ -393,11 +403,10 @@ public class FACropPhotoViewController: UIViewController {
         self.viewState.rotationAngle = 0.0
         
         self.updateUI(animated: animated)
-        self.updateScrollInsets()
     }
     
-    private func updateScrollInsets() {
-
+    private func calculateScrollViewInset() -> UIEdgeInsets {
+        
         let cropRect = self.cropControl.convert(self.cropControl.cropFrame, to: nil)
         let scrollRect = self.contentView.convert(self.scrollView.frame, to: nil)
         let top = cropRect.minY - scrollRect.minY
@@ -406,42 +415,68 @@ public class FACropPhotoViewController: UIViewController {
         let right = scrollRect.maxX - cropRect.maxX
         
         let insets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
-        if self.scrollView.contentInset != insets {
-            self.scrollView.contentInset = insets
-        }
+        return insets
     }
     
-    private func updateUI(animated: Bool = false) {
+    private func updateUI(animated: Bool = false, options: UpdateAction? = nil) {
         var state = self.viewState
+        let action = options ?? .all
         
-        if self.scrollView.frame.size != state.scrollViewSize {
-            self.scrollView.frame.size = state.scrollViewSize
-        }
-        
-        let size = state.cropControlFrame.size
-        let minScale = self.imageView.bounds.size.scaleToFill(to: size)
-        if self.scrollView.minimumZoomScale != minScale {
-            self.scrollView.minimumZoomScale = minScale
-        }
-        if state.scrollViewZoom < minScale {
-            state.scrollViewZoom = minScale
+        if action.contains(.size) {
+            if self.scrollView.frame.size != state.scrollViewSize {
+                self.scrollView.frame.size = state.scrollViewSize
+            }
         }
         
-        if self.scrollView.zoomScale != state.scrollViewZoom {
-            self.scrollView.zoomScale = state.scrollViewZoom
+        if action.contains(.zoom) {
+            let size = state.cropControlFrame.size
+            let minScale = self.imageView.bounds.size.scaleToFill(to: size)
+            if self.scrollView.minimumZoomScale != minScale {
+                self.scrollView.minimumZoomScale = minScale
+            }
+            if state.scrollViewZoom < minScale {
+                state.scrollViewZoom = minScale
+            }
+            
+            if self.scrollView.zoomScale != state.scrollViewZoom {
+                self.scrollView.zoomScale = state.scrollViewZoom
+            }
+        }
+
+        if action.contains(.offset) {
+            let contentOffset = state.scrollViewOffset
+            if self.scrollView.contentOffset != contentOffset {
+                self.scrollView.contentOffset = contentOffset
+            }
+        }
+
+        if action.contains(.rotate) {
+            let transform = CGAffineTransform(rotationAngle: state.rotationAngle)
+            let transform3D = CATransform3DMakeAffineTransform(transform)
+            if !CATransform3DEqualToTransform(self.imageView.layer.transform, transform3D) {
+                self.imageView.layer.transform = transform3D
+            }
+        }
+
+        if action.contains(.crop) {
+            if !self.cropControl.cropFrame.equalTo(state.cropControlFrame) {
+                self.cropControl.setCropFrame(state.cropControlFrame, animated: animated)
+            }
+        }
+
+        if action.contains(.inset) {
+            
+            let contentInset = self.calculateScrollViewInset()
+            if self.scrollView.contentInset != contentInset {
+                self.scrollView.contentInset = contentInset
+            }
         }
         
-        let contentOffset = state.scrollViewOffset
-        if self.scrollView.contentOffset != contentOffset {
-            self.scrollView.contentOffset = contentOffset
-        }
-        let transform = CGAffineTransform(rotationAngle: state.rotationAngle)
-        let transform3D = CATransform3DMakeAffineTransform(transform)
-        if !CATransform3DEqualToTransform(self.imageView.layer.transform, transform3D) {
-            self.imageView.layer.transform = transform3D
-        }
-        if !self.cropControl.cropFrame.equalTo(state.cropControlFrame) {
-            self.cropControl.setCropFrame(state.cropControlFrame, animated: animated)
+        // Fix bug scollView when set zero inset
+        if self.scrollView.zoomScale == self.scrollView.minimumZoomScale,
+            self.scrollView.contentOffset == .zero {
+            let inset = self.scrollView.contentInset
+            self.scrollView.contentOffset = CGPoint(x: -inset.left, y: -inset.top)
         }
         
         self.viewState = state
