@@ -146,10 +146,11 @@ public class FACropControl: UIControl {
     
     public func setCropFrame(_ cropFrame: CGRect, animated: Bool = false) {
         
-        guard self.maxCropFrame.contains(cropFrame) else {
-            return
+        var frame = cropFrame
+        if !self.maxCropFrame.contains(cropFrame) {
+            frame = self.maxCropFrame.intersection(cropFrame)
         }
-        self.cropFrame = cropFrame
+        self.cropFrame = frame
         
         self.cropView.frame = self.cropFrame
         self.rotateView.frame = self.cropFrame
@@ -310,8 +311,8 @@ extension FACropControl: UIGestureRecognizerDelegate {
         
         let point = gestureRecognizer.location(in: self)
         let inset = Const.touchAreaWidth/1.5
-        let frame = self.cropView.frame.insetBy(dx: -inset, dy: -inset)
-        let exept = self.cropView.frame.insetBy(dx: inset, dy: inset)
+        let frame = self.cropFrame.insetBy(dx: -inset, dy: -inset)
+        let exept = self.cropFrame.insetBy(dx: inset, dy: inset)
         
         if frame.contains(point), !exept.contains(point) {
             

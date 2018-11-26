@@ -432,10 +432,8 @@ public class FACropPhotoViewController: UIViewController {
         }
         
         let contentOffset = state.scrollViewOffset
-        let inset = self.scrollView.contentInset
-        let initialOffset = CGPoint(x: inset.left, y: inset.top)
-        if self.scrollView.contentOffset != contentOffset, self.scrollView.contentOffset != initialOffset {
-            self.scrollView.setContentOffset(contentOffset, animated: animated)
+        if self.scrollView.contentOffset != contentOffset {
+            self.scrollView.contentOffset = contentOffset
         }
         let transform = CGAffineTransform(rotationAngle: state.rotationAngle)
         let transform3D = CATransform3DMakeAffineTransform(transform)
