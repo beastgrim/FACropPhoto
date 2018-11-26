@@ -7,7 +7,6 @@
 
 import UIKit
 
-
 public enum AspectRatio: CaseIterable {
     case r1x1
     case r2x3
@@ -37,25 +36,29 @@ public enum AspectRatio: CaseIterable {
     }
 }
 
+protocol FACropControlDelegate: NSObjectProtocol {
+    func cropControlWillBeginDragging(_ cropControl: FACropControl)
+    func cropControlDidEndDragging(_ cropControl: FACropControl)
+}
 
 public class FACropControl: UIControl {
-    
+
     struct Const {
-        static let touchAreaWidth: CGFloat = 44
+        static var animationDuration: TimeInterval = 0.4
+        static var touchAreaWidth: CGFloat = 44
+        static var debounceTime: TimeInterval = 1.2
+        static var cropInset: CGFloat = 15
     }
 
-    
+    weak var delegate: FACropControlDelegate?
     var cropView: UIView!
     var rotateView: FARotationControl!
+    var effectView: UIVisualEffectView!
     
-    var cropFrame: CGRect = .zero {
-        didSet {
-            self.cropView.frame = self.cropFrame
-            self.rotateView.frame = self.cropFrame
-                .offsetBy(dx: 0, dy: self.cropFrame.height)
-                .with(height: 60)
-        }
-    }
+    private(set) var cropFrame: CGRect = .zero
+    private(set) var maxCropFrame: CGRect = .zero
+    private(set) var panGestureRecognizer: UIPanGestureRecognizer!
+
     
     // MARK: - Init
 
@@ -66,12 +69,25 @@ public class FACropControl: UIControl {
         self.panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panGestureAction(_:)))
         self.panGestureRecognizer.maximumNumberOfTouches = 1
         self.panGestureRecognizer.delegate = self
+        self.addGestureRecognizer(self.panGestureRecognizer)
+        
+        let effectView = UIVisualEffectView(frame: self.bounds)
+        effectView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        effectView.effect = UIBlurEffect(style: .dark)
+        effectView.backgroundColor = UIColor(white: 0.0, alpha: 0.4)
+        let mask = FAMaskView(frame: self.bounds)
+        mask.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        mask.backgroundColor = .clear
+        self.cropMaskView = mask
+        effectView.layer.mask = mask.layer
+        self.addSubview(effectView)
+        self.effectView = effectView
         
         let cropView = UIView(frame: self.bounds.insetBy(dx: 8, dy: 8))
         cropView.backgroundColor = .clear
         cropView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         cropView.layer.borderColor = UIColor.white.cgColor
-        cropView.layer.borderWidth = 2.0
+        cropView.layer.borderWidth = 1.0
         cropView.isUserInteractionEnabled = false
         self.addSubview(cropView)
         self.cropView = cropView
@@ -80,14 +96,67 @@ public class FACropControl: UIControl {
         rotateControl.autoresizingMask = [.flexibleWidth,.flexibleTopMargin,.flexibleBottomMargin]
         self.addSubview(rotateControl)
         self.rotateView = rotateControl
+        
+        let inset = Const.cropInset
+        self.maxCropFrame = self.bounds.insetBy(dx: inset, dy: inset)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+
+        self.cropMaskView.frame = self.bounds
+        self.cropMaskView.setCropRect(self.cropFrame, animated: false)
+        
+        let inset = Const.cropInset
+        self.maxCropFrame = self.bounds.insetBy(dx: inset, dy: inset)
+    }
+    
     
     // MARK: - Public
+    
+    public func splashBlure() {
+        self.disableBlur()
+        self.debounceSetupBlur()
+    }
+    
+    public func disableBlur() {
+        let selector = #selector(self.setupBlur)
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: selector, object: nil)
+        
+        guard self.effectView.effect != nil else { return }
+        
+        UIView.animate(withDuration: FACropControl.Const.animationDuration, delay: 0, options: [.allowUserInteraction], animations: {
+            self.effectView.effect = nil
+            
+        }) { (_) in }
+    }
+    
+    @objc public func setupBlur() {
+        
+        guard self.effectView.effect == nil else { return }
+        
+        UIView.animate(withDuration: FACropControl.Const.animationDuration, delay: 0, options: [.allowUserInteraction], animations: {
+            self.effectView.effect = UIBlurEffect(style: .dark)
+        }) { (_) in }
+    }
+    
+    public func setCropFrame(_ cropFrame: CGRect, animated: Bool = false) {
+        
+        guard self.maxCropFrame.contains(cropFrame) else {
+            return
+        }
+        self.cropFrame = cropFrame
+        
+        self.cropView.frame = self.cropFrame
+        self.rotateView.frame = self.cropFrame
+            .offsetBy(dx: 0, dy: self.cropFrame.height)
+            .with(height: 60)
+        self.cropMaskView.setCropRect(self.cropFrame, animated: animated)
+    }
     
     public func setAspectRatio(_ aspectRatio: AspectRatio, atCenter point: CGPoint? = nil, animated: Bool = false) {
         self.setAspectRatio(aspectRatio.ratio, atCenter: point, animated: animated)
@@ -96,7 +165,7 @@ public class FACropControl: UIControl {
     public func setAspectRatio(_ aspectRatio: CGFloat, atCenter point: CGPoint? = nil, animated: Bool = false) {
 
         let doBlock = {
-            let size = self.bounds.size
+            let size = self.maxCropFrame.size
             let ratio = aspectRatio
             let height = size.width*ratio
             
@@ -110,14 +179,14 @@ public class FACropControl: UIControl {
             cropFrame.origin = CGPoint(x: self.bounds.midX-cropFrame.width/2,
                                        y: self.bounds.midY-cropFrame.height/2)
 
-            self.cropFrame = cropFrame
+            self.setCropFrame(cropFrame, animated: animated)
             self.sendActions(for: .valueChanged)
             
             self.layoutIfNeeded()
         }
         
         if animated {
-            UIView.animate(withDuration: 0.24) {
+            UIView.animate(withDuration: FACropControl.Const.animationDuration) {
                 doBlock()
             }
         } else {
@@ -126,14 +195,124 @@ public class FACropControl: UIControl {
     }
     
     
+    // MARK: - Private
+    
+    private func debounceSetupBlur() {
+        let selector = #selector(self.setupBlur)
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: selector, object: nil)
+        
+        self.perform(selector, with: nil, afterDelay: FACropControl.Const.debounceTime)
+    }
+    
+    
     // MARK: - Override
 
-    override public func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+    
+    // MARK: - Actions
+
+    
+    // MARK: - Private
+    private var cropMaskView: FAMaskView!
+    private var directions: UIRectEdge = []
+    private var touch: UITouch?
+    private var startPoint: CGPoint = .zero
+    private var startFrame: CGRect = .zero
+    
+}
+
+//MARK: - Gesture Recognizer Delegate
+extension FACropControl: UIGestureRecognizerDelegate {
+
+    @objc private func panGestureAction(_ sender: UIPanGestureRecognizer) {
         
-        let inset = Const.touchAreaWidth/2.0
+        switch sender.state {
+  
+        case .possible: break
+            
+        case .began:
+            let location = sender.location(in: self)
+            
+            self.startPoint = location
+            self.startFrame = self.cropView.frame
+            self.disableBlur()
+            self.delegate?.cropControlWillBeginDragging(self)
+            
+        case .changed:
+            let translation = sender.translation(in: self)
+            let minSide: CGFloat = Const.touchAreaWidth*2.0
+            let inset: CGFloat = Const.cropInset
+
+            let frame = self.cropView.frame
+            var newFrame = self.startFrame
+            if self.directions.contains(.top) {
+                let newHeight = newFrame.height - translation.y
+                let newY = newFrame.minY + translation.y
+                if newHeight >= minSide {
+                    if newY >= inset {
+                        newFrame.origin.y = newY
+                        newFrame.size.height = newHeight
+                    } else {
+                        newFrame.origin.y = inset
+                        newFrame.size.height = newHeight + newY - inset
+                    }
+                } else {
+                    newFrame.origin.y = frame.maxY - minSide
+                    newFrame.size.height = minSide
+                }
+            }
+            if self.directions.contains(.left) {
+                let newWidth = newFrame.width - translation.x
+                let newX = newFrame.minX + translation.x
+                if newWidth >= minSide {
+                    if newX >= inset {
+                        newFrame.origin.x += translation.x
+                        newFrame.size.width = newWidth
+                    } else {
+                        newFrame.origin.x = inset
+                        newFrame.size.width = newWidth + newX - inset
+                    }
+                } else {
+                    newFrame.origin.x = frame.maxX - minSide
+                    newFrame.size.width = minSide
+                }
+            }
+            if self.directions.contains(.bottom) {
+                let newHeight = newFrame.height + translation.y
+                if newHeight >= minSide {
+                    let maxHeight = self.bounds.height - newFrame.minY - inset
+                    newFrame.size.height = min(maxHeight, newHeight)
+                } else {
+                    newFrame.size.height = minSide
+                }
+            }
+            if self.directions.contains(.right) {
+                let newWidth = newFrame.width + translation.x
+                if newWidth >= minSide {
+                    let maxWidth = self.bounds.width - newFrame.minX - inset
+                    newFrame.size.width = min(maxWidth, newWidth)
+                } else {
+                    newFrame.size.width = minSide
+                }
+            }
+            
+            if !self.cropView.frame.equalTo(newFrame) {
+                self.setCropFrame(newFrame)
+                self.sendActions(for: .valueChanged)
+            }
+            
+        case .ended, .cancelled, .failed:
+            self.delegate?.cropControlDidEndDragging(self)
+            self.splashBlure()
+        }
+    }
+    
+    override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        
+        let point = gestureRecognizer.location(in: self)
+        let inset = Const.touchAreaWidth/1.5
         let frame = self.cropView.frame.insetBy(dx: -inset, dy: -inset)
         let exept = self.cropView.frame.insetBy(dx: inset, dy: inset)
-
+        
         if frame.contains(point), !exept.contains(point) {
             
             var options: UIRectEdge = []
@@ -160,108 +339,9 @@ public class FACropControl: UIControl {
         self.directions = []
         return false
     }
-    
-    public override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        let superTest = super.hitTest(point, with: event)
 
-        let inset = Const.touchAreaWidth/2.0
-        let frame = self.cropView.frame.insetBy(dx: -inset, dy: -inset)
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
 
-        if frame.contains(point), superTest != nil {
-            return self
-        }
-        return superTest
-    }
-    
-    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard self.touch == nil, let touch = touches.first else { return }
-        
-        self.touch = touch
-        self.startPoint = touch.location(in: self)
-        self.startFrame = self.cropView.frame
-    }
-    
-    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = self.touch, touches.contains(touch) else { return }
-        
-        let newLocation = touch.location(in: self)
-        let minSide: CGFloat = Const.touchAreaWidth*2.0
-
-        let translation = CGPoint(x: newLocation.x-self.startPoint.x,
-                                  y: newLocation.y-self.startPoint.y)
-        let frame = self.cropView.frame
-        var newFrame = self.startFrame
-        if self.directions.contains(.top) {
-            let newHeight = newFrame.height - translation.y
-            if newHeight >= minSide {
-                newFrame.origin.y += translation.y
-                newFrame.size.height = newHeight
-            } else {
-                newFrame.origin.y = frame.maxY - minSide
-                newFrame.size.height = minSide
-            }
-        }
-        if self.directions.contains(.left) {
-            let newWidth = newFrame.width - translation.x
-            if newWidth >= minSide {
-                newFrame.origin.x += translation.x
-                newFrame.size.width = newWidth
-            } else {
-                newFrame.origin.x = frame.maxX - minSide
-                newFrame.size.width = minSide
-            }
-        }
-        if self.directions.contains(.bottom) {
-            let newHeight = newFrame.height + translation.y
-            if newHeight >= minSide {
-                newFrame.size.height = newHeight
-            } else {
-                newFrame.size.height = minSide
-            }
-        }
-        if self.directions.contains(.right) {
-            let newWidth = newFrame.width + translation.x
-            if newWidth >= minSide {
-                newFrame.size.width += translation.x
-            } else {
-                newFrame.size.width = minSide
-            }
-        }
-   
-        if !self.cropView.frame.equalTo(newFrame) {
-            self.cropFrame = newFrame
-            self.sendActions(for: .valueChanged)
-        }
-    }
-    
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.touch = nil
-    }
-
-    public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.touch = nil
-    }
-    
-    
-    // MARK: _ Actions
-    
-    @objc private func panGestureAction(_ sender: UIPanGestureRecognizer) {
-        
-    }
-    
-    // MARK: - Private
-    private var directions: UIRectEdge = []
-    private var panGestureRecognizer: UIPanGestureRecognizer!
-    private var touch: UITouch?
-    private var startPoint: CGPoint = .zero
-    private var startFrame: CGRect = .zero
-    
-}
-
-extension FACropControl: UIGestureRecognizerDelegate {
-    
-    override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        
         return true
     }
 }

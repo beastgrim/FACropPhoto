@@ -44,7 +44,7 @@ extension CGRect {
             r = r.croppedBy(y: side)
         }
         if options.contains(.left) {
-            r = r.croppedBy(y: side)
+            r = r.croppedBy(x: side)
         }
         if options.contains(.bottom) {
             r.size.height -= side
@@ -105,5 +105,19 @@ extension CGSize {
     
     func scaleToFill(to size: CGSize) -> CGFloat {
         return max(size.width/self.width, size.height/self.height)
+    }
+    
+    func minus(size: CGSize) -> CGSize {
+        var r = self
+        r.width -= size.width
+        r.height -= size.height
+        return r
+    }
+    
+    func minus(point: CGPoint) -> CGSize {
+        var r = self
+        r.width -= point.x
+        r.height -= point.y
+        return r
     }
 }

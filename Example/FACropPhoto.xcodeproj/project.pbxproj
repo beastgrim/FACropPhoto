@@ -17,6 +17,8 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
+		84633C7521A8B933004A38DB /* FAMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84633C7421A8B933004A38DB /* FAMaskView.swift */; };
+		84F2F6CE21AA01F700BF56E7 /* UIImage+Icons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2F6CD21AA01F700BF56E7 /* UIImage+Icons.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +48,8 @@
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		83E95F6668A8EC21C0FEB6AF /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		84633C7421A8B933004A38DB /* FAMaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAMaskView.swift; sourceTree = "<group>"; };
+		84F2F6CD21AA01F700BF56E7 /* UIImage+Icons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Icons.swift"; sourceTree = "<group>"; };
 		A3DDD988E9CF121EC9BB7BD3 /* FACropPhoto.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = FACropPhoto.podspec; path = ../FACropPhoto.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
@@ -74,6 +78,8 @@
 				5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */,
 				5CDCFBE421A6B5B300DD97AB /* FARotationControl.swift */,
 				5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */,
+				84633C7421A8B933004A38DB /* FAMaskView.swift */,
+				84F2F6CD21AA01F700BF56E7 /* UIImage+Icons.swift */,
 			);
 			name = Classes;
 			path = ../../FACropPhoto/Classes;
@@ -194,7 +200,7 @@
 			attributes = {
 				CLASSPREFIX = FA;
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = FaceApp;
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
@@ -254,10 +260,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5CDCFBE321A6AF5700DD97AB /* CGRect+Helpers.swift in Sources */,
+				84633C7521A8B933004A38DB /* FAMaskView.swift in Sources */,
 				5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				5CDCFBE221A6AF5700DD97AB /* FACropPhotoViewController.swift in Sources */,
 				5CDCFBE521A6B5B300DD97AB /* FARotationControl.swift in Sources */,
+				84F2F6CE21AA01F700BF56E7 /* UIImage+Icons.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -312,12 +320,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -365,12 +375,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -412,7 +424,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.fa.FACropPhoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -429,7 +441,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.fa.FACropPhoto;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
 		};

@@ -51,10 +51,13 @@ class ViewController: UIViewController {
         let cases = AspectRatio.allCases
         let ratio = cases[Int(arc4random()%UInt32(cases.count))]
         self.cropVC?.setCropAspecRatio(FACropAspectRatio.industry(ratio), animated: true)
+        
+        let image = UIImage.generateIcon(size: CGSize(width: 80, height: 80), aspectRatio: ratio)
+        print("\(image)")
     }
     
     @objc func align(_ sender: Any?) {
-        self.cropVC?.alignCropToCenter(animated: true)
+        self.cropVC?.resetCropping(animated: true)
     }
 
 }
