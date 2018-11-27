@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5C1AE58D21AC0807003BC95E /* FAAspectRatioControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */; };
 		5C1AE58F21AC2272003BC95E /* FAStandartControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */; };
+		5C80C7D221AD3C7000408261 /* FAGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C80C7D121AD3C7000408261 /* FAGridView.swift */; };
 		5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */; };
 		5CDCFBE221A6AF5700DD97AB /* FACropPhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */; };
 		5CDCFBE321A6AF5700DD97AB /* CGRect+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */; };
@@ -37,6 +38,7 @@
 		4331CC432BFC3D774E0CABEC /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAAspectRatioControl.swift; sourceTree = "<group>"; };
 		5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAStandartControlsView.swift; sourceTree = "<group>"; };
+		5C80C7D121AD3C7000408261 /* FAGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAGridView.swift; sourceTree = "<group>"; };
 		5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropControl.swift; sourceTree = "<group>"; };
 		5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropPhotoViewController.swift; sourceTree = "<group>"; };
 		5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGRect+Helpers.swift"; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				84F2F6CD21AA01F700BF56E7 /* UIImage+Icons.swift */,
 				5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */,
 				5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */,
+				5C80C7D121AD3C7000408261 /* FAGridView.swift */,
 			);
 			name = Classes;
 			path = ../../FACropPhoto/Classes;
@@ -272,6 +275,7 @@
 				5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				5CDCFBE221A6AF5700DD97AB /* FACropPhotoViewController.swift in Sources */,
+				5C80C7D221AD3C7000408261 /* FAGridView.swift in Sources */,
 				5CDCFBE521A6B5B300DD97AB /* FARotationControl.swift in Sources */,
 				84F2F6CE21AA01F700BF56E7 /* UIImage+Icons.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,

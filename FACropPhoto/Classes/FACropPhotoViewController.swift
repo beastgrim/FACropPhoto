@@ -309,20 +309,18 @@ public class FACropPhotoViewController: UIViewController {
                 cropSize.height *= scale
             }
             
+            var scrollInsets = self.scrollView.contentInset
+            var imagePoint = self.scrollView.contentOffset
+            imagePoint.x += scrollInsets.left
+            imagePoint.y += scrollInsets.top
+            imagePoint.x /= self.scrollView.zoomScale
+            imagePoint.y /= self.scrollView.zoomScale
+            
             let cropFrame = CGRect(x: (maxSize.width-cropSize.width)/2 + inset.x,
                                    y: (maxSize.height-cropSize.height)/2 + inset.y,
                                    width: cropSize.width,
                                    height: cropSize.height)
             
-            var scrollInsets = self.scrollView.contentInset
-            var imagePoint = self.scrollView.contentOffset
-            imagePoint.x += scrollInsets.left
-            imagePoint.y += scrollInsets.top
-            imagePoint.x -= inset.x
-            imagePoint.y -= inset.y
-            imagePoint.x /= self.scrollView.zoomScale
-            imagePoint.y /= self.scrollView.zoomScale
-
             let newScale = self.viewState.scrollViewZoom*scale
             self.viewState.scrollViewZoom = min(self.scrollView.maximumZoomScale, newScale)
             self.viewState.cropControlFrame = cropFrame
@@ -334,8 +332,6 @@ public class FACropPhotoViewController: UIViewController {
             offset.y *= self.viewState.scrollViewZoom
             offset.x -= scrollInsets.left
             offset.y -= scrollInsets.top
-            offset.x += inset.x
-            offset.y += inset.y
             
             self.viewState.scrollViewOffset = offset
             self.updateUI(animated: animated)

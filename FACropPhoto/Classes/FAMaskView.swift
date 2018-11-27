@@ -28,7 +28,7 @@ internal class FAMaskView: UIView {
         
         if animated {
             
-            let animation = CABasicAnimation(keyPath: "path")
+            let animation = CABasicAnimation(keyPath: #keyPath(CAShapeLayer.path))
             animation.fromValue = self.shapeLayer.path
             animation.toValue = path
             animation.duration = duration

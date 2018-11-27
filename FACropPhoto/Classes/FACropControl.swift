@@ -63,15 +63,15 @@ protocol FACropControlDelegate: NSObjectProtocol {
 
 public class FACropControl: UIControl {
 
-    struct Const {
-        static var animationDuration: TimeInterval = 0.4
-        static var touchAreaWidth: CGFloat = 44
-        static var debounceTime: TimeInterval = 1.2
-        static var cropInset: CGFloat = 15
+    public struct Const {
+        static public var animationDuration: TimeInterval = 0.4
+        static public var touchAreaWidth: CGFloat = 44
+        static public var debounceTime: TimeInterval = 1.2
+        static public var cropInset: CGFloat = 15
     }
 
     weak var delegate: FACropControlDelegate?
-    var cropView: UIView!
+    var gridView: FAGridView!
     var rotateView: FARotationControl!
     var effectView: UIVisualEffectView!
     
@@ -103,14 +103,14 @@ public class FACropControl: UIControl {
         self.addSubview(effectView)
         self.effectView = effectView
         
-        let cropView = UIView(frame: self.bounds.insetBy(dx: 8, dy: 8))
+        let cropView = FAGridView(frame: self.bounds.insetBy(dx: 8, dy: 8))
         cropView.backgroundColor = .clear
         cropView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         cropView.layer.borderColor = UIColor.white.cgColor
         cropView.layer.borderWidth = 1.0
         cropView.isUserInteractionEnabled = false
         self.addSubview(cropView)
-        self.cropView = cropView
+        self.gridView = cropView
         
         let rotateControl = FARotationControl(frame: self.bounds.with(width: 60))
         rotateControl.autoresizingMask = [.flexibleWidth,.flexibleTopMargin,.flexibleBottomMargin]
@@ -151,7 +151,7 @@ public class FACropControl: UIControl {
         
         UIView.animate(withDuration: FACropControl.Const.animationDuration, delay: 0, options: [.allowUserInteraction], animations: {
             self.effectView.effect = nil
-            
+            self.gridView.showGrid(true, animated: true)
         }) { (_) in }
     }
     
@@ -161,6 +161,7 @@ public class FACropControl: UIControl {
         
         UIView.animate(withDuration: FACropControl.Const.animationDuration, delay: 0, options: [.allowUserInteraction], animations: {
             self.effectView.effect = UIBlurEffect(style: .dark)
+            self.gridView.showGrid(false, animated: true)
         }) { (_) in }
     }
     
@@ -172,7 +173,7 @@ public class FACropControl: UIControl {
         }
         self.cropFrame = frame
         
-        self.cropView.frame = self.cropFrame
+        self.gridView.setFrame(self.cropFrame, animated: animated)
         self.rotateView.frame = self.cropFrame
             .offsetBy(dx: 0, dy: self.cropFrame.height)
             .with(height: 60)
@@ -254,7 +255,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
             let location = sender.location(in: self)
             
             self.startPoint = location
-            self.startFrame = self.cropView.frame
+            self.startFrame = self.gridView.frame
             self.disableBlur()
             self.delegate?.cropControlWillBeginDragging(self)
             
@@ -263,7 +264,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
             let minSide: CGFloat = Const.touchAreaWidth*2.0
             let inset: CGFloat = Const.cropInset
 
-            let frame = self.cropView.frame
+            let frame = self.gridView.frame
             var newFrame = self.startFrame
             if self.directions.contains(.top) {
                 let newHeight = newFrame.height - translation.y
@@ -316,7 +317,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
                 }
             }
             
-            if !self.cropView.frame.equalTo(newFrame) {
+            if !self.gridView.frame.equalTo(newFrame) {
                 self.setCropFrame(newFrame)
                 self.sendActions(for: .valueChanged)
             }
