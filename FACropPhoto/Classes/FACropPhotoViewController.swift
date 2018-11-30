@@ -32,9 +32,11 @@ public class FACropPhotoViewController: UIViewController {
     struct ViewState {
         var scrollViewZoom: CGFloat
         var scrollViewOffset: CGPoint
+        var scrollViewInset: UIEdgeInsets
         var scrollViewSize: CGSize
         var rotationAngle: CGFloat
         var cropControlFrame: CGRect
+        var aspectRatio: AspectRatio?
     }
     
     struct UpdateAction: OptionSet {
@@ -46,8 +48,9 @@ public class FACropPhotoViewController: UIViewController {
         static let size =   UpdateAction(rawValue: 1<<3)
         static let rotate = UpdateAction(rawValue: 1<<4)
         static let inset =  UpdateAction(rawValue: 1<<5)
+        static let ratio =  UpdateAction(rawValue: 1<<6)
         
-        static let all: UpdateAction = [.offset, .zoom, .crop, .size, .rotate, .inset]
+        static let all: UpdateAction = [.offset, .zoom, .crop, .size, .rotate, .inset, .ratio]
     }
     
     struct Const {
@@ -59,13 +62,13 @@ public class FACropPhotoViewController: UIViewController {
     public weak var delegate: FACropPhotoViewControllerDelegate?
     public private(set) var cropAspectRatio: FACropAspectRatio?
     public private(set) var standartControlsView: FAStandartControlsView?
+    public private(set) var cropControl: FACropControl!
     private(set) var viewState: ViewState
     private(set) var contentView: UIView!
     private(set) var controlsContentView: UIView!
     private(set) var imageContainerView: UIView!
     private(set) var scrollView: UIScrollView!
     private(set) var imageView: UIImageView!
-    private(set) var cropControl: FACropControl!
     private(set) var aspectRatioControl: FAAspectRatioControl!
     public var imageCropRect: CGRect {
         
@@ -79,9 +82,9 @@ public class FACropPhotoViewController: UIViewController {
             return fullRect
         }
         
-        let inset = self.scrollView.contentInset
-        let zoomScale = self.scrollView.zoomScale/self.image.scale
-        var imagePoint = self.scrollView.contentOffset
+        let inset = self.viewState.scrollViewInset
+        let zoomScale = self.viewState.scrollViewZoom/self.image.scale
+        var imagePoint = self.viewState.scrollViewOffset
         imagePoint.x += inset.left
         imagePoint.y += inset.top
         imagePoint.x /= zoomScale
@@ -117,14 +120,20 @@ public class FACropPhotoViewController: UIViewController {
         self.options = options
         self.viewState = ViewState(scrollViewZoom: 1.0,
                                    scrollViewOffset: .zero,
+                                   scrollViewInset: .zero,
                                    scrollViewSize: .zero,
                                    rotationAngle: 0.0,
-                                   cropControlFrame: .zero)
+                                   cropControlFrame: .zero,
+                                   aspectRatio: nil)
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        self.observations.forEach({ $0.invalidate() })
     }
     
     
@@ -165,6 +174,10 @@ public class FACropPhotoViewController: UIViewController {
         if #available(iOS 11.0, *) {
             scrollView.contentInsetAdjustmentBehavior = .never
         }
+        self.observations += [
+            scrollView.observe(\.contentInset, options: [.initial,.new]) { [unowned self] (scrollView, _) in
+            self.viewState.scrollViewInset = scrollView.contentInset
+        }]
         self.contentView.addSubview(scrollView)
         self.scrollView = scrollView
         
@@ -193,6 +206,7 @@ public class FACropPhotoViewController: UIViewController {
             controls.autoresizingMask = [.flexibleWidth,.flexibleHeight]
             controls.aspectRatioButton.addTarget(self, action: #selector(shooseAspectRatioAction(_:)), for: .touchUpInside)
             self.controlsContentView.addSubview(controls)
+            self.standartControlsView = controls
             
             /*
             let aspectRatioControl = FAAspectRatioControl(frame: self.controlsContentView.bounds)
@@ -289,6 +303,7 @@ public class FACropPhotoViewController: UIViewController {
         }
         self.cropControl?.setAspectRatio(ratioValue, animated: animated)
         self.alignCropToCenter(animated: animated)
+        self.updateUI(animated: false, options: .ratio)
     }
     
     public func alignCropToCenter(animated: Bool = false) {
@@ -383,6 +398,11 @@ public class FACropPhotoViewController: UIViewController {
     
     @objc private func shooseAspectRatioAction(_ sender: Any?) {
         
+        if self.viewState.aspectRatio != nil {
+            self.cancelAspectRatioAction(sender)
+            return
+        }
+        
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel, handler: nil))
@@ -400,6 +420,7 @@ public class FACropPhotoViewController: UIViewController {
 
             sheet.addAction(UIAlertAction(title: title, style: .default, handler: { [weak self] (action) in
                 
+                self?.viewState.aspectRatio = ratio
                 self?.setCropAspecRatio(uiRatio, animated: true)
             }))
         }
@@ -407,8 +428,14 @@ public class FACropPhotoViewController: UIViewController {
         self.present(sheet, animated: true, completion: nil)
     }
     
+    @objc private func cancelAspectRatioAction(_ sender: Any?) {
+        self.viewState.aspectRatio = nil
+        self.updateUI(animated: true, options: .ratio)
+    }
+    
     
     // MARK: - Private
+    private var observations: [NSKeyValueObservation] = []
     private var isFirstAppear = true
     private var swipeToBackGestureIsOn: Bool = false
     
@@ -451,39 +478,38 @@ public class FACropPhotoViewController: UIViewController {
     }
     
     private func updateUI(animated: Bool = false, options: UpdateAction? = nil) {
-        var state = self.viewState
         let action = options ?? .all
         
         if action.contains(.size) {
-            if self.scrollView.frame.size != state.scrollViewSize {
-                self.scrollView.frame.size = state.scrollViewSize
+            if self.scrollView.frame.size != self.viewState.scrollViewSize {
+                self.scrollView.frame.size = self.viewState.scrollViewSize
             }
         }
         
         if action.contains(.zoom) {
-            let size = state.cropControlFrame.size
+            let size = self.viewState.cropControlFrame.size
             let minScale = self.imageView.bounds.size.scaleToFill(to: size)
             if self.scrollView.minimumZoomScale != minScale {
                 self.scrollView.minimumZoomScale = minScale
             }
-            if state.scrollViewZoom < minScale {
-                state.scrollViewZoom = minScale
+            if self.viewState.scrollViewZoom < minScale {
+                self.viewState.scrollViewZoom = minScale
             }
             
-            if self.scrollView.zoomScale != state.scrollViewZoom {
-                self.scrollView.zoomScale = state.scrollViewZoom
+            if self.scrollView.zoomScale != self.viewState.scrollViewZoom {
+                self.scrollView.zoomScale = self.viewState.scrollViewZoom
             }
         }
 
         if action.contains(.offset) {
-            let contentOffset = state.scrollViewOffset
+            let contentOffset = self.viewState.scrollViewOffset
             if self.scrollView.contentOffset != contentOffset {
                 self.scrollView.contentOffset = contentOffset
             }
         }
 
         if action.contains(.rotate) {
-            let transform = CGAffineTransform(rotationAngle: state.rotationAngle)
+            let transform = CGAffineTransform(rotationAngle: self.viewState.rotationAngle)
             let transform3D = CATransform3DMakeAffineTransform(transform)
             if !CATransform3DEqualToTransform(self.imageView.layer.transform, transform3D) {
                 self.imageView.layer.transform = transform3D
@@ -491,8 +517,8 @@ public class FACropPhotoViewController: UIViewController {
         }
 
         if action.contains(.crop) {
-            if !self.cropControl.cropFrame.equalTo(state.cropControlFrame) {
-                self.cropControl.setCropFrame(state.cropControlFrame, animated: animated)
+            if !self.cropControl.cropFrame.equalTo(self.viewState.cropControlFrame) {
+                self.cropControl.setCropFrame(self.viewState.cropControlFrame, animated: animated)
             }
         }
 
@@ -504,14 +530,23 @@ public class FACropPhotoViewController: UIViewController {
             }
         }
         
+        if action.contains(.ratio) {
+            let aspectRatio = self.viewState.aspectRatio
+            if self.cropControl.aspectRatio != aspectRatio {
+                self.cropControl.aspectRatio = aspectRatio
+            }
+            let isSelected = self.viewState.aspectRatio != nil
+            if self.standartControlsView?.aspectRatioButton.isSelected != isSelected {
+                self.standartControlsView?.aspectRatioButton.isSelected = isSelected
+            }
+        }
+        
         // Fix bug scollView when set zero inset
         if self.scrollView.zoomScale == self.scrollView.minimumZoomScale,
             self.scrollView.contentOffset == .zero {
             let inset = self.scrollView.contentInset
             self.scrollView.contentOffset = CGPoint(x: -inset.left, y: -inset.top)
         }
-        
-        self.viewState = state
     }
 
 }

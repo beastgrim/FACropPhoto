@@ -32,7 +32,7 @@ extension UIImage {
             case .r1x1:
                 context.stroke(frame)
                 
-            case .r2x3, .r3x4, .r3x5, .r4x5, .r5x7, .r9x16:
+            default:
                 let ratio = aspectRatio.ratio
                 var frame = frame
                 frame.size.height *= ratio

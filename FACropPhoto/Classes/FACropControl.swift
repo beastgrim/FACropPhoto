@@ -9,12 +9,12 @@ import UIKit
 
 public enum AspectRatio: CaseIterable {
     case r1x1
-    case r2x3
-    case r3x5
-    case r3x4
     case r4x5
-    case r5x7
+    case r2x3
     case r9x16
+    case r5x4
+    case r3x2
+    case r16x9
     
     public var ratio: CGFloat {
         switch self {
@@ -22,16 +22,16 @@ public enum AspectRatio: CaseIterable {
             return 1.0
         case .r2x3:
             return 2/3
-        case .r3x5:
-            return 3/5
-        case .r3x4:
-            return 3/4
         case .r4x5:
             return 4/5
-        case .r5x7:
-            return 5/7
         case .r9x16:
             return 9/16
+        case .r5x4:
+            return 5/4
+        case .r3x2:
+            return 3/2
+        case .r16x9:
+            return 16/9
         }
     }
     
@@ -42,16 +42,16 @@ public enum AspectRatio: CaseIterable {
             return "1:1"
         case .r2x3:
             return "2:3"
-        case .r3x5:
-            return "3:5"
-        case .r3x4:
-            return "3:4"
         case .r4x5:
             return "4:5"
-        case .r5x7:
-            return "5:7"
         case .r9x16:
             return "9:16"
+        case .r5x4:
+            return "5:4"
+        case .r3x2:
+            return "3:2"
+        case .r16x9:
+            return "16:9"
         }
     }
 }
@@ -74,6 +74,10 @@ public class FACropControl: UIControl {
     var gridView: FAGridView!
     var rotateView: FARotationControl!
     var effectView: UIVisualEffectView!
+    var aspectRatio: AspectRatio?
+    public var visualEffect: UIVisualEffect = UIBlurEffect(style: UIBlurEffect.Style.dark) {
+        didSet { self.effectView.effect = self.visualEffect }
+    }
     
     private(set) var cropFrame: CGRect = .zero
     private(set) var maxCropFrame: CGRect = .zero
@@ -93,7 +97,7 @@ public class FACropControl: UIControl {
         
         let effectView = UIVisualEffectView(frame: self.bounds)
         effectView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
-        effectView.effect = UIBlurEffect(style: .dark)
+        effectView.effect = self.visualEffect
         effectView.backgroundColor = UIColor(white: 0.0, alpha: 0.4)
         let mask = FAMaskView(frame: self.bounds)
         mask.autoresizingMask = [.flexibleWidth,.flexibleHeight]
@@ -160,7 +164,7 @@ public class FACropControl: UIControl {
         guard self.effectView.effect == nil else { return }
         
         UIView.animate(withDuration: FACropControl.Const.animationDuration, delay: 0, options: [.allowUserInteraction], animations: {
-            self.effectView.effect = UIBlurEffect(style: .dark)
+            self.effectView.effect = self.visualEffect
             self.gridView.showGrid(false, animated: true)
         }) { (_) in }
     }
@@ -189,7 +193,7 @@ public class FACropControl: UIControl {
         let doBlock = {
             let size = self.maxCropFrame.size
             let ratio = aspectRatio
-            let height = size.width*ratio
+            let height = size.width/ratio
             
             var cropFrame: CGRect = .zero
             if height <= size.height {
@@ -266,54 +270,191 @@ extension FACropControl: UIGestureRecognizerDelegate {
 
             let frame = self.gridView.frame
             var newFrame = self.startFrame
-            if self.directions.contains(.top) {
-                let newHeight = newFrame.height - translation.y
-                let newY = newFrame.minY + translation.y
-                if newHeight >= minSide {
-                    if newY >= inset {
-                        newFrame.origin.y = newY
-                        newFrame.size.height = newHeight
+            let maxHeight = self.aspectRatio == nil ? self.maxCropFrame.height : self.maxCropFrame.width*self.aspectRatio!.ratio
+            let maxWidth = self.aspectRatio == nil ? self.maxCropFrame.width : self.maxCropFrame.width/self.aspectRatio!.ratio
+            
+            if let ratio = self.aspectRatio?.ratio {
+                
+                if self.directions.contains(.top),
+                    self.directions.contains(.left) {
+                    
+                    let move = (translation.x + translation.y)/2
+                    
+                    var point = self.startFrame.origin
+                    point.x = max(self.maxCropFrame.minX, min(self.startFrame.maxX-minSide, point.x+move))
+
+                    let width = self.startFrame.maxX-point.x
+                    let maxHeight = self.startFrame.maxY-self.maxCropFrame.minY
+                    let height = min(maxHeight, width/ratio)
+
+                    newFrame.size.width = height*ratio
+                    newFrame.size.height = height
+                    point.y = self.startFrame.maxY-height
+                    newFrame.origin = point
+
+                } else if self.directions.contains(.top),
+                    self.directions.contains(.right) {
+                    
+                    let move = (-translation.x + translation.y)/2
+         
+                    var point = CGPoint(x: max(self.startFrame.minX+minSide, min(self.maxCropFrame.maxX, self.startPoint.x-move)),
+                                       y: 0)
+                    
+                    let width = point.x - self.startFrame.minX
+                    let maxHeight = self.startFrame.maxY-self.maxCropFrame.minY
+                    let height = min(maxHeight, width/ratio)
+                    
+                    newFrame.size.width = height*ratio
+                    newFrame.size.height = height
+                    point.x -= width
+                    point.y = self.startFrame.maxY-height
+                    newFrame.origin = point
+                    
+                } else if self.directions.contains(.left),
+                    self.directions.contains(.bottom) {
+                    
+                    let move = (translation.x + -translation.y)/2
+                    
+                    var point = CGPoint(x: max(self.maxCropFrame.minX, min(self.startFrame.maxX-minSide, self.startPoint.x+move)),
+                                        y: 0)
+                    
+                    let width = self.startFrame.maxX-point.x
+                    let maxHeight = self.startFrame.maxY-self.maxCropFrame.minY
+                    let height = min(maxHeight, width/ratio)
+                    
+                    newFrame.size.width = height*ratio
+                    newFrame.size.height = height
+                    point.x = self.startFrame.maxX-width
+                    point.y = self.startFrame.minY
+                    newFrame.origin = point
+                    
+                } else if self.directions.contains(.right),
+                    self.directions.contains(.bottom) {
+                    
+                    let move = (-translation.x + -translation.y)/2
+                    
+                    var point = CGPoint(x: max(self.startFrame.minX+minSide, min(self.maxCropFrame.maxX, self.startPoint.x-move)),
+                                        y: 0)
+                    
+                    let width = point.x - self.startFrame.minX
+                    let maxHeight = self.startFrame.maxY-self.maxCropFrame.minY
+                    let height = min(maxHeight, width/ratio)
+                    
+                    newFrame.size.width = height*ratio
+                    newFrame.size.height = height
+                    point.x = self.startFrame.minX
+                    point.y = self.startFrame.minY
+                    newFrame.origin = point
+                    
+                } else if self.directions.contains(.top) {
+                    
+                    let move = translation.y
+                    
+                    let minHeight = max(minSide, minSide/ratio)
+                    let y = max(self.maxCropFrame.minY, min(self.startFrame.maxY-minHeight, self.startPoint.y+move))
+                    let height = self.startFrame.maxY-y
+                    let width = min(self.maxCropFrame.width, max(minSide, height*ratio))
+                    
+                    newFrame.size.width = width
+                    newFrame.size.height = width/ratio
+                    newFrame.origin.y = y
+                    newFrame.origin.x += (self.startFrame.width-width)/2
+
+                } else if self.directions.contains(.left) {
+
+                    let move = translation.x
+                    
+                    let x = max(self.maxCropFrame.minX, min(self.startFrame.maxX-minSide, self.startPoint.x+move))
+                    
+                    let width = self.startFrame.maxX-x
+                    let maxHeight = self.maxCropFrame.height
+                    let height = min(maxHeight, width/ratio)
+
+                    newFrame.size.height = height
+                    newFrame.size.width = height*ratio
+                    newFrame.origin.x = x
+                    newFrame.origin.y += (self.startFrame.height-height)/2
+                    
+                } else if self.directions.contains(.bottom) {
+                    
+                    let move = translation.y
+                    
+                    let maxY = max(self.startFrame.minY+minSide, min(self.maxCropFrame.maxY, self.startPoint.y+move))
+                    let maxWidth = self.maxCropFrame.width
+                    let height = maxY-self.startFrame.minY
+                    let width = min(maxWidth, max(minSide, height*ratio))
+                    
+                    newFrame.origin.x += (self.startFrame.width-width)/2
+                    newFrame.size.width = width
+                    newFrame.size.height = width/ratio
+                    newFrame.origin.y = maxY-newFrame.height
+                    
+                } else if self.directions.contains(.right) {
+                    
+                    let move = translation.x
+                    
+                    let maxX = max(self.startFrame.minX+minSide, min(self.maxCropFrame.maxX, self.startPoint.x+move))
+                    let width = maxX-self.startFrame.minX
+                    let maxHeight = self.maxCropFrame.height
+                    let height = min(maxHeight, width/ratio)
+                    
+                    newFrame.origin.y += (self.startFrame.height-height)/2
+                    newFrame.size.width = height*ratio
+                    newFrame.size.height = height
+                    newFrame.origin.x = self.startFrame.minX
+                }
+                
+            } else {
+                
+                if self.directions.contains(.top) {
+                    let newHeight = newFrame.height - translation.y
+                    let newY = newFrame.minY + translation.y
+                    if newHeight >= minSide {
+                        if newY >= inset {
+                            newFrame.origin.y = newY
+                            newFrame.size.height = min(newHeight, maxHeight)
+                        } else {
+                            newFrame.origin.y = inset
+                            newFrame.size.height = min(newHeight + newY - inset, maxHeight)
+                        }
                     } else {
-                        newFrame.origin.y = inset
-                        newFrame.size.height = newHeight + newY - inset
+                        newFrame.origin.y = frame.maxY - minSide
+                        newFrame.size.height = minSide
                     }
-                } else {
-                    newFrame.origin.y = frame.maxY - minSide
-                    newFrame.size.height = minSide
                 }
-            }
-            if self.directions.contains(.left) {
-                let newWidth = newFrame.width - translation.x
-                let newX = newFrame.minX + translation.x
-                if newWidth >= minSide {
-                    if newX >= inset {
-                        newFrame.origin.x += translation.x
-                        newFrame.size.width = newWidth
+                if self.directions.contains(.left) {
+                    let newWidth = newFrame.width - translation.x
+                    let newX = newFrame.minX + translation.x
+                    if newWidth >= minSide {
+                        if newX >= inset {
+                            newFrame.origin.x += translation.x
+                            newFrame.size.width = min(newWidth, maxWidth)
+                        } else {
+                            newFrame.origin.x = inset
+                            newFrame.size.width = min(newWidth + newX - inset, maxWidth)
+                        }
                     } else {
-                        newFrame.origin.x = inset
-                        newFrame.size.width = newWidth + newX - inset
+                        newFrame.origin.x = frame.maxX - minSide
+                        newFrame.size.width = minSide
                     }
-                } else {
-                    newFrame.origin.x = frame.maxX - minSide
-                    newFrame.size.width = minSide
                 }
-            }
-            if self.directions.contains(.bottom) {
-                let newHeight = newFrame.height + translation.y
-                if newHeight >= minSide {
-                    let maxHeight = self.bounds.height - newFrame.minY - inset
-                    newFrame.size.height = min(maxHeight, newHeight)
-                } else {
-                    newFrame.size.height = minSide
+                if self.directions.contains(.bottom) {
+                    let newHeight = newFrame.height + translation.y
+                    if newHeight >= minSide {
+                        let maxHeight = self.bounds.height - newFrame.minY - inset
+                        newFrame.size.height = min(maxHeight, newHeight)
+                    } else {
+                        newFrame.size.height = minSide
+                    }
                 }
-            }
-            if self.directions.contains(.right) {
-                let newWidth = newFrame.width + translation.x
-                if newWidth >= minSide {
-                    let maxWidth = self.bounds.width - newFrame.minX - inset
-                    newFrame.size.width = min(maxWidth, newWidth)
-                } else {
-                    newFrame.size.width = minSide
+                if self.directions.contains(.right) {
+                    let newWidth = newFrame.width + translation.x
+                    if newWidth >= minSide {
+                        let maxWidth = self.bounds.width - newFrame.minX - inset
+                        newFrame.size.width = min(maxWidth, newWidth)
+                    } else {
+                        newFrame.size.width = minSide
+                    }
                 }
             }
             
@@ -331,7 +472,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
     override public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         
         let point = gestureRecognizer.location(in: self)
-        let inset = Const.touchAreaWidth/1.5
+        let inset = Const.touchAreaWidth/2
         let frame = self.cropFrame.insetBy(dx: -inset, dy: -inset)
         let exept = self.cropFrame.insetBy(dx: inset, dy: inset)
         

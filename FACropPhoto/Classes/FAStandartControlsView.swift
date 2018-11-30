@@ -16,6 +16,7 @@ public class FAStandartControlsView: UIStackView {
         
         let aspectRatioButton = UIButton(type: .system)
         aspectRatioButton.setTitle("Aspect ratio", for: .normal)
+        aspectRatioButton.contentHorizontalAlignment = .center
         self.aspectRatioButton = aspectRatioButton
         
         super.init(frame: frame)
@@ -23,7 +24,7 @@ public class FAStandartControlsView: UIStackView {
 
         self.axis = .horizontal
         
-        self.distribution = .fillProportionally
+        self.distribution = .fillEqually
         self.alignment = .center
     }
     
