@@ -67,6 +67,7 @@ class ViewController: UIViewController {
                 UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),
                 UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(align(_:)))]
             self.navigationController?.pushViewController(vc, animated: true)
+            self.navigationController?.navigationBar.isTranslucent = false
             vc.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissAction(_:)))
             self.cropVC = vc
         }

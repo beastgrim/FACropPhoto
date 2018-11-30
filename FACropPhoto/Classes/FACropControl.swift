@@ -201,17 +201,13 @@ public class FACropControl: UIControl {
         let doBlock = {
             let size = self.maxCropFrame.size
             let ratio = aspectRatio
-            let height = size.width/ratio
-            
-            var cropFrame: CGRect = .zero
-            if height <= size.height {
-                cropFrame.size = CGSize(width: size.width, height: height)
-            } else {
-                let width = size.height/ratio
-                cropFrame.size = CGSize(width: width, height: size.height)
-            }
-            cropFrame.origin = CGPoint(x: self.bounds.midX-cropFrame.width/2,
-                                       y: self.bounds.midY-cropFrame.height/2)
+            var height = min(self.maxCropFrame.height, size.width/ratio)
+            let width = min(self.maxCropFrame.width, height*ratio)
+            height = width/ratio
+
+            let point = CGPoint(x: self.bounds.midX-width/2,
+                                       y: self.bounds.midY-height/2)
+            let cropFrame = CGRect(origin: point, size: CGSize(width: width, height: height))
 
             self.setCropFrame(cropFrame, animated: animated)
             self.sendActions(for: .valueChanged)
@@ -402,15 +398,16 @@ extension FACropControl: UIGestureRecognizerDelegate {
                     let move = translation.x
                     
                     let maxX = max(self.startFrame.minX+minSide, min(self.maxCropFrame.maxX, self.startPoint.x+move))
-                    let width = maxX-self.startFrame.minX
-                    let maxHeight = self.maxCropFrame.height
-                    let height = min(maxHeight, width/ratio)
+                    var width = maxX-self.startFrame.minX
+                    let height = min(self.maxCropFrame.height, width/ratio)
+                    width = min(self.maxCropFrame.width, height*ratio)
                     let y = max(self.maxCropFrame.minY, min(self.maxCropFrame.maxY-height, newFrame.minY + (self.startFrame.height-height)/2))
                     
                     newFrame.origin.y = y
-                    newFrame.size.width = height*ratio
+                    newFrame.size.width = width
                     newFrame.size.height = height
-                    newFrame.origin.x = self.startFrame.minX
+                    newFrame.origin.x = maxX-width
+                    print("\(maxX)")
                 }
                 
             } else {
