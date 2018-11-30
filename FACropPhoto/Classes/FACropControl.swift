@@ -8,26 +8,33 @@
 import UIKit
 
 public enum AspectRatio: CaseIterable {
+    
+    public typealias AllCases = [AspectRatio]
+    public static var allCases: [AspectRatio] = [.r1x1,.r3x4,.r2x3,.r9x16,.r4x3,.r3x2,.r16x9]
+
+    case custom(ratio: CGFloat)
     case r1x1
-    case r4x5
+    case r3x4
     case r2x3
     case r9x16
-    case r5x4
+    case r4x3
     case r3x2
     case r16x9
     
     public var ratio: CGFloat {
         switch self {
+        case .custom(ratio: let ratio):
+            return ratio
         case .r1x1:
             return 1.0
         case .r2x3:
             return 2/3
-        case .r4x5:
-            return 4/5
+        case .r3x4:
+            return 3/4
         case .r9x16:
             return 9/16
-        case .r5x4:
-            return 5/4
+        case .r4x3:
+            return 4/3
         case .r3x2:
             return 3/2
         case .r16x9:
@@ -37,17 +44,18 @@ public enum AspectRatio: CaseIterable {
     
     public var title: String {
         switch self {
-            
+        case .custom(ratio: _):
+            return ""
         case .r1x1:
             return "1:1"
         case .r2x3:
             return "2:3"
-        case .r4x5:
-            return "4:5"
+        case .r3x4:
+            return "3:4"
         case .r9x16:
             return "9:16"
-        case .r5x4:
-            return "5:4"
+        case .r4x3:
+            return "4:3"
         case .r3x2:
             return "3:2"
         case .r16x9:
@@ -313,38 +321,34 @@ extension FACropControl: UIGestureRecognizerDelegate {
                 } else if self.directions.contains(.left),
                     self.directions.contains(.bottom) {
                     
-                    let move = (translation.x + -translation.y)/2
-                    
-                    var point = CGPoint(x: max(self.maxCropFrame.minX, min(self.startFrame.maxX-minSide, self.startPoint.x+move)),
-                                        y: 0)
-                    
-                    let width = self.startFrame.maxX-point.x
-                    let maxHeight = self.startFrame.maxY-self.maxCropFrame.minY
-                    let height = min(maxHeight, width/ratio)
-                    
-                    newFrame.size.width = height*ratio
-                    newFrame.size.height = height
-                    point.x = self.startFrame.maxX-width
-                    point.y = self.startFrame.minY
-                    newFrame.origin = point
+                    let x = max(self.maxCropFrame.minX, min(self.startFrame.maxX-minSide, self.startPoint.x+translation.x))
+                    let maxY = max(self.startFrame.minY+minSide, min(self.maxCropFrame.maxY, self.startPoint.y+translation.y))
+
+                    var width = self.startFrame.maxX-x
+                    var height = maxY-self.startFrame.minY
+                    height = min(height, width/ratio)
+                    width = min(width, height*ratio)
+
+                    newFrame.size.width = width
+                    newFrame.size.height = width/ratio
+                    newFrame.origin.x = self.startFrame.maxX-width
+                    newFrame.origin.y = self.startFrame.minY
                     
                 } else if self.directions.contains(.right),
                     self.directions.contains(.bottom) {
-                    
-                    let move = (-translation.x + -translation.y)/2
-                    
-                    var point = CGPoint(x: max(self.startFrame.minX+minSide, min(self.maxCropFrame.maxX, self.startPoint.x-move)),
-                                        y: 0)
-                    
-                    let width = point.x - self.startFrame.minX
-                    let maxHeight = self.startFrame.maxY-self.maxCropFrame.minY
-                    let height = min(maxHeight, width/ratio)
+
+                    let maxX = max(self.startFrame.minX+minSide, min(self.maxCropFrame.maxX, self.startPoint.x+translation.x))
+                    let maxY = max(self.startFrame.minY+minSide, min(self.maxCropFrame.maxY, self.startPoint.y+translation.y))
+        
+                    var width = maxX-self.startFrame.minX
+                    var height = maxY-self.startFrame.minY
+                    height = min(height, width/ratio)
+                    width = min(width, height*ratio)
                     
                     newFrame.size.width = height*ratio
                     newFrame.size.height = height
-                    point.x = self.startFrame.minX
-                    point.y = self.startFrame.minY
-                    newFrame.origin = point
+                    newFrame.origin.x = self.startFrame.minX
+                    newFrame.origin.y = self.startFrame.minY
                     
                 } else if self.directions.contains(.top) {
                     
@@ -358,7 +362,8 @@ extension FACropControl: UIGestureRecognizerDelegate {
                     newFrame.size.width = width
                     newFrame.size.height = width/ratio
                     newFrame.origin.y = y
-                    newFrame.origin.x += (self.startFrame.width-width)/2
+                    let x = max(self.maxCropFrame.minX, min(self.maxCropFrame.maxX-width, newFrame.minX + (self.startFrame.width-width)/2))
+                    newFrame.origin.x = x
 
                 } else if self.directions.contains(.left) {
 
@@ -369,22 +374,25 @@ extension FACropControl: UIGestureRecognizerDelegate {
                     let width = self.startFrame.maxX-x
                     let maxHeight = self.maxCropFrame.height
                     let height = min(maxHeight, width/ratio)
+                    let y = max(self.maxCropFrame.minY, min(self.maxCropFrame.maxY-height, newFrame.minY + (self.startFrame.height-height)/2))
 
                     newFrame.size.height = height
                     newFrame.size.width = height*ratio
                     newFrame.origin.x = x
-                    newFrame.origin.y += (self.startFrame.height-height)/2
+                    newFrame.origin.y = y
                     
                 } else if self.directions.contains(.bottom) {
                     
                     let move = translation.y
                     
-                    let maxY = max(self.startFrame.minY+minSide, min(self.maxCropFrame.maxY, self.startPoint.y+move))
+                    let minHeight = max(minSide, minSide/ratio)
+                    let maxY = max(self.startFrame.minY+minHeight, min(self.maxCropFrame.maxY, self.startPoint.y+move))
                     let maxWidth = self.maxCropFrame.width
                     let height = maxY-self.startFrame.minY
                     let width = min(maxWidth, max(minSide, height*ratio))
-                    
-                    newFrame.origin.x += (self.startFrame.width-width)/2
+                    let x = max(self.maxCropFrame.minX, min(self.maxCropFrame.maxX-width, newFrame.minX + (self.startFrame.width-width)/2))
+
+                    newFrame.origin.x = x
                     newFrame.size.width = width
                     newFrame.size.height = width/ratio
                     newFrame.origin.y = maxY-newFrame.height
@@ -397,8 +405,9 @@ extension FACropControl: UIGestureRecognizerDelegate {
                     let width = maxX-self.startFrame.minX
                     let maxHeight = self.maxCropFrame.height
                     let height = min(maxHeight, width/ratio)
+                    let y = max(self.maxCropFrame.minY, min(self.maxCropFrame.maxY-height, newFrame.minY + (self.startFrame.height-height)/2))
                     
-                    newFrame.origin.y += (self.startFrame.height-height)/2
+                    newFrame.origin.y = y
                     newFrame.size.width = height*ratio
                     newFrame.size.height = height
                     newFrame.origin.x = self.startFrame.minX

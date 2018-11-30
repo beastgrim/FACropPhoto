@@ -14,7 +14,7 @@ public class FAStandartControlsView: UIStackView {
     
     override init(frame: CGRect) {
         
-        let aspectRatioButton = UIButton(type: .system)
+        let aspectRatioButton = UIButton(type: .custom)
         aspectRatioButton.setTitle("Aspect ratio", for: .normal)
         aspectRatioButton.contentHorizontalAlignment = .center
         self.aspectRatioButton = aspectRatioButton

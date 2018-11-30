@@ -10,7 +10,7 @@ import os.log
 
 public enum FACropAspectRatio {
     case original
-    case industry(_ ration: AspectRatio)
+    case industry(_ ratio: AspectRatio)
 }
 
 public struct FACropPhotoOptions {
@@ -25,6 +25,7 @@ public struct FACropPhotoOptions {
 
 public protocol FACropPhotoViewControllerDelegate: NSObjectProtocol {
     func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, titleFor aspectRatio: FACropAspectRatio) -> String
+    func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, didSetAspectRatio aspectRatio: FACropAspectRatio?)
 }
 
 public class FACropPhotoViewController: UIViewController {
@@ -60,7 +61,11 @@ public class FACropPhotoViewController: UIViewController {
     public let image: UIImage
     public let options: FACropPhotoOptions
     public weak var delegate: FACropPhotoViewControllerDelegate?
-    public private(set) var cropAspectRatio: FACropAspectRatio?
+    public private(set) var cropAspectRatio: FACropAspectRatio? {
+        didSet {
+            self.delegate?.cropPhotoViewController(self, didSetAspectRatio: self.cropAspectRatio)
+        }
+    }
     public private(set) var standartControlsView: FAStandartControlsView?
     public private(set) var cropControl: FACropControl!
     private(set) var viewState: ViewState
@@ -276,9 +281,15 @@ public class FACropPhotoViewController: UIViewController {
     
     // MARK: - Public
     
+    @objc public func resetCropping(_ sender: Any?) {
+        self.resetCropping(animated: true)
+    }
+    
     public func resetCropping(animated: Bool = false) {
         
         let doBlock = {
+            self.cropAspectRatio = nil
+            self.viewState.aspectRatio = nil
             self.setupScrollView(animated: animated)
             self.view.layoutIfNeeded()
         }
@@ -298,8 +309,10 @@ public class FACropPhotoViewController: UIViewController {
         switch aspectRatio {
         case .original:
             ratioValue = self.image.size.width/self.image.size.height
+            self.viewState.aspectRatio = nil
         case .industry(let ratio):
             ratioValue = ratio.ratio
+            self.viewState.aspectRatio = ratio
         }
         self.cropControl?.setAspectRatio(ratioValue, animated: animated)
         self.alignCropToCenter(animated: animated)
@@ -396,12 +409,7 @@ public class FACropPhotoViewController: UIViewController {
         self.cropControl.setupBlur()
     }
     
-    @objc private func shooseAspectRatioAction(_ sender: Any?) {
-        
-        if self.viewState.aspectRatio != nil {
-            self.cancelAspectRatioAction(sender)
-            return
-        }
+    @objc public func shooseAspectRatioAction(_ sender: Any?) {
         
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
@@ -411,7 +419,14 @@ public class FACropPhotoViewController: UIViewController {
             NSLocalizedString("Original", comment: "")
         
         sheet.addAction(UIAlertAction(title: title, style: .default, handler: { [weak self] (action) in
-            self?.resetCropping(animated: true)
+
+            guard let self = self else { return }
+            
+            let ratio = self.image.size.width/self.image.size.height
+            let aspectRatio = AspectRatio.custom(ratio: ratio)
+            self.viewState.aspectRatio = aspectRatio
+            let uiRatio = FACropAspectRatio.industry(aspectRatio)
+            self.setCropAspecRatio(uiRatio, animated: true)
         }))
 
         AspectRatio.allCases.forEach { (ratio) in
@@ -428,7 +443,7 @@ public class FACropPhotoViewController: UIViewController {
         self.present(sheet, animated: true, completion: nil)
     }
     
-    @objc private func cancelAspectRatioAction(_ sender: Any?) {
+    @objc public func cancelAspectRatioAction(_ sender: Any?) {
         self.viewState.aspectRatio = nil
         self.updateUI(animated: true, options: .ratio)
     }
@@ -532,9 +547,8 @@ public class FACropPhotoViewController: UIViewController {
         
         if action.contains(.ratio) {
             let aspectRatio = self.viewState.aspectRatio
-            if self.cropControl.aspectRatio != aspectRatio {
-                self.cropControl.aspectRatio = aspectRatio
-            }
+            self.cropControl.aspectRatio = aspectRatio
+
             let isSelected = self.viewState.aspectRatio != nil
             if self.standartControlsView?.aspectRatioButton.isSelected != isSelected {
                 self.standartControlsView?.aspectRatioButton.isSelected = isSelected
