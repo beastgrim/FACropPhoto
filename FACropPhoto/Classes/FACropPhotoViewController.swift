@@ -64,12 +64,14 @@ public class FACropPhotoViewController: UIViewController {
             let scale = oldValue.scale
             let newValue = self.image
             
-            if self.isViewLoaded,
-                (size != newValue.size || scale != newValue.scale) {
-                
+            if self.isViewLoaded {
                 self.imageView.image = newValue
-                self.imageView.sizeToFit()
-                self.scrollView.contentSize = self.imageView.bounds.size
+                
+                if (size != newValue.size || scale != newValue.scale) {
+                    self.imageView.sizeToFit()
+                    self.scrollView.contentSize = self.imageView.bounds.size
+                    self.setupScrollView()
+                }
             }
         }
     }
