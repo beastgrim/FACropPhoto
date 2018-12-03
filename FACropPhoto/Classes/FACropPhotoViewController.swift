@@ -58,7 +58,21 @@ public class FACropPhotoViewController: UIViewController {
         static var controlsHeight: CGFloat = 44.0
     }
     
-    public let image: UIImage
+    public var image: UIImage {
+        didSet {
+            let size = oldValue.size
+            let scale = oldValue.scale
+            let newValue = self.image
+            
+            if self.isViewLoaded,
+                (size != newValue.size || scale != newValue.scale) {
+                
+                self.imageView.image = newValue
+                self.imageView.sizeToFit()
+                self.scrollView.contentSize = self.imageView.bounds.size
+            }
+        }
+    }
     public let options: FACropPhotoOptions
     public weak var delegate: FACropPhotoViewControllerDelegate?
     public private(set) var cropAspectRatio: FACropAspectRatio? {
