@@ -68,15 +68,14 @@ extension UIImage {
         }
         
         let image = self
+        let scale = image.scale
 
         if let cgImage = image.cgImage {
             let orientation = image.imageOrientation
-            let scale = image.scale
-            var fullRect = CGRect(origin: .zero, size: image.size)
-            fullRect.size.width *= scale
-            fullRect.size.height *= scale
+            let fullRect = CGRect(origin: .zero, size: image.size.scale(scale))
+            
             // Apply orientation
-            let cgCropRect = cropRect.appliedImageOrientation(orientation, with: fullRect.size)
+            let cgCropRect = cropRect.scale(scale).appliedImageOrientation(orientation, with: fullRect.size)
             
             if let cropped = cgImage.cropping(to: cgCropRect) {
                 let croppedImage = UIImage(cgImage: cropped,
@@ -86,8 +85,8 @@ extension UIImage {
             }
         } else if let ciImage = image.ciImage {
             // Convert to another coordinate system (0,0) -> bottom,left
-            var ciCropRect = cropRect
-            ciCropRect.origin.y = ciImage.extent.height - cropRect.maxY
+            var ciCropRect = cropRect.scale(scale)
+            ciCropRect.origin.y = ciImage.extent.height - ciCropRect.maxY
             
             if let cgImage = CIContext().createCGImage(ciImage, from: ciCropRect) {
                 let croppedImage = UIImage(cgImage: cgImage,

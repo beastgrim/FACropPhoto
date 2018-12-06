@@ -56,14 +56,20 @@ class ViewController: UIViewController {
         
         if let image = UIImage(named: "img") {
             
-            let ciImage = CIImage(image: image)!
-            let image = UIImage(ciImage: ciImage)
+//            let ciImage = CIImage(image: image)!
+//            var image = UIImage(ciImage: ciImage)
             
             var options = FACropPhotoOptions()
             options.showControls = true
             options.controlsHeight = 44.0
-            let vc = self.cropVC ?? FACropPhotoViewController(image: image, options: options)
-            vc.navigationItem.rightBarButtonItems  = [
+//            if scale {
+//                image = UIImage(ciImage: ciImage, scale: 2.0, orientation: .up)
+//                image = UIImage(cgImage: image.cgImage!, scale: 2.0, orientation: .up)
+//                self.cropVC?.image = image
+//            }
+            let vc = FACropPhotoViewController(image: image, options: options)
+
+            vc.navigationItem.rightBarButtonItems = [
                 UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),
                 UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(align(_:)))]
             self.navigationController?.pushViewController(vc, animated: true)

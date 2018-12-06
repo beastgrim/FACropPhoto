@@ -95,6 +95,13 @@ extension CGRect {
         
         return rect
     }
+    
+    func scale(_ value: CGFloat) -> CGRect {
+        var r = self
+        r.size = r.size.scale(value)
+        r.origin = r.origin.scale(value)
+        return r
+    }
 }
 
 extension CGSize {
@@ -119,5 +126,22 @@ extension CGSize {
         r.width -= point.x
         r.height -= point.y
         return r
+    }
+    
+    func scale(_ value: CGFloat) -> CGSize {
+        var size = self
+        size.width *= value
+        size.height *= value
+        return size
+    }
+}
+
+extension CGPoint {
+    
+    func scale(_ value: CGFloat) -> CGPoint {
+        var point = self
+        point.x *= value
+        point.y *= value
+        return point
     }
 }
