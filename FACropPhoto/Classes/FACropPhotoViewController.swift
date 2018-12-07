@@ -312,6 +312,9 @@ public class FACropPhotoViewController: UIViewController {
     public func resetCropping(animated: Bool = false) {
         
         let doBlock = {
+            self.scrollView?.isScrollEnabled = false
+            self.scrollView?.isScrollEnabled = true
+            self.initialCropRect = nil
             self.cropAspectRatio = nil
             self.viewState.aspectRatio = nil
             self.setupScrollView(animated: animated)

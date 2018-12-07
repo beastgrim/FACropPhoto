@@ -67,7 +67,7 @@ class ViewController: UIViewController {
 //                image = UIImage(cgImage: image.cgImage!, scale: 2.0, orientation: .up)
 //                self.cropVC?.image = image
 //            }
-            let vc = FACropPhotoViewController(image: image, options: options)
+            let vc = self.cropVC ?? FACropPhotoViewController(image: image, options: options)
 
             vc.navigationItem.rightBarButtonItems = [
                 UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),
