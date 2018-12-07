@@ -65,7 +65,17 @@ public class FACropPhotoViewController: UIViewController {
     struct Const {
         static var controlsHeight: CGFloat = 44.0
     }
-    public var initialCropRect: CGRect?
+    public var initialCropRect: CGRect? {
+        didSet {
+            if self.isViewLoaded {
+                self.disableAllAnimations()
+                self.cropAspectRatio = nil
+                self.viewState.aspectRatio = nil
+                self.viewState.scrollViewZoom = 1.0
+                self.setupScrollView()
+            }
+        }
+    }
     public var image: UIImage {
         didSet {
             let size = oldValue.size
@@ -272,6 +282,7 @@ public class FACropPhotoViewController: UIViewController {
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = self.swipeToBackGestureIsOn
+        self.disableAllAnimations()
     }
     
     override public func viewDidLayoutSubviews() {
@@ -494,6 +505,7 @@ public class FACropPhotoViewController: UIViewController {
             
             let initialScale = initialCrop.size.scaleToFit(to: cropMaxSize)
             self.viewState.scrollViewZoom = initialScale
+            self.updateUI(animated: false, options: [.zoom])
 
             var initialCropFrame: CGRect = .zero
             let imageSize = initialCrop.size
@@ -522,7 +534,7 @@ public class FACropPhotoViewController: UIViewController {
             self.viewState.rotationAngle = 0.0
         }
         
-        self.updateUI()
+        self.updateUI(animated: animated)
     }
     
     private func calculateScrollViewInset() -> UIEdgeInsets {
@@ -607,6 +619,11 @@ public class FACropPhotoViewController: UIViewController {
             let inset = self.scrollView.contentInset
             self.scrollView.contentOffset = CGPoint(x: -inset.left, y: -inset.top)
         }
+    }
+    
+    private func disableAllAnimations() {
+        let selector = #selector(self.alignCropAction)
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: selector, object: nil)
     }
 
 }
