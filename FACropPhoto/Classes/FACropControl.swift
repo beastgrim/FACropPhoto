@@ -81,7 +81,7 @@ public class FACropControl: UIControl {
     weak var delegate: FACropControlDelegate?
     var gridView: FAGridView!
     var rotateView: FARotationControl!
-    var effectView: UIVisualEffectView!
+    public private(set) var effectView: UIVisualEffectView!
     var aspectRatio: AspectRatio?
     public var visualEffect: UIVisualEffect = UIBlurEffect(style: UIBlurEffect.Style.dark) {
         didSet { self.effectView.effect = self.visualEffect }
