@@ -124,7 +124,7 @@ public class FACropControl: UIControl {
         self.addSubview(cropView)
         self.gridView = cropView
         
-        let rotateControl = FARotationControl(frame: self.bounds.with(width: 60))
+        let rotateControl = FARotationControl(frame: self.bounds.with(width: 88))
         rotateControl.autoresizingMask = [.flexibleWidth,.flexibleTopMargin,.flexibleBottomMargin]
         self.addSubview(rotateControl)
         self.rotateView = rotateControl
@@ -264,9 +264,12 @@ extension FACropControl: UIGestureRecognizerDelegate {
             
             self.startPoint = location
             self.startFrame = self.gridView.frame
-            self.disableBlur()
-            self.delegate?.cropControlWillBeginDragging(self)
-            
+            if self.directions == [] {
+                self.rotateView.panGestureAction(sender)
+            } else {
+                self.disableBlur()
+                self.delegate?.cropControlWillBeginDragging(self)
+            }
         case .changed:
             let translation = sender.translation(in: self)
             let minSide: CGFloat = Const.touchAreaWidth*2.0
@@ -277,7 +280,9 @@ extension FACropControl: UIGestureRecognizerDelegate {
             let maxHeight = self.aspectRatio == nil ? self.maxCropFrame.height : self.maxCropFrame.width*self.aspectRatio!.ratio
             let maxWidth = self.aspectRatio == nil ? self.maxCropFrame.width : self.maxCropFrame.width/self.aspectRatio!.ratio
             
-            if let ratio = self.aspectRatio?.ratio {
+            if self.directions == [] {
+                self.rotateView.panGestureAction(sender)
+            } else if let ratio = self.aspectRatio?.ratio {
                 
                 if self.directions.contains(.top),
                     self.directions.contains(.left) {
@@ -470,8 +475,12 @@ extension FACropControl: UIGestureRecognizerDelegate {
             }
             
         case .ended, .cancelled, .failed:
-            self.delegate?.cropControlDidEndDragging(self)
-            self.splashBlure()
+            if self.directions == [] {
+                self.rotateView.panGestureAction(sender)
+            } else {
+                self.delegate?.cropControlDidEndDragging(self)
+                self.splashBlure()
+            }
         }
     }
     
@@ -479,6 +488,12 @@ extension FACropControl: UIGestureRecognizerDelegate {
         
         let point = gestureRecognizer.location(in: self)
         let inset = Const.touchAreaWidth/2
+
+        if !self.rotateView.isHidden, self.rotateView.frame.contains(point) {
+            self.directions = []
+            return true
+        }
+        
         let frame = self.cropFrame.insetBy(dx: -inset, dy: -inset)
         let exept = self.cropFrame.insetBy(dx: inset, dy: inset)
         
@@ -498,10 +513,6 @@ extension FACropControl: UIGestureRecognizerDelegate {
                 options.insert(.bottom)
             }
             self.directions = options
-            return true
-            
-        } else if self.rotateView.frame.contains(point) {
-            self.directions = []
             return true
         }
         

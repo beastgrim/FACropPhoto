@@ -9,10 +9,7 @@ import UIKit
 
 open class FARotationControl: UIControl {
     
-    public private(set) var rotationAngel: CGFloat = 0.0 {
-        didSet {
-        }
-    }
+    public var rotationAngel: CGFloat = 0.0
 
     override init(frame: CGRect) {
     
@@ -51,7 +48,6 @@ open class FARotationControl: UIControl {
             let maxMove = CGFloat( Double.pi/8 )
 
             self.rotationAngel = min(self.mainRotationAngle + maxMove, max(self.mainRotationAngle - maxMove, newAngle))
-            print("Change angle: \(newAngle)")
             
             self.sendActions(for: .valueChanged)
         case .ended,.cancelled,.failed:
