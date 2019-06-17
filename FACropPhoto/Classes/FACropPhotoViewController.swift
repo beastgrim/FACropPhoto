@@ -23,6 +23,89 @@ public struct FACropPhotoOptions {
     }
 }
 
+public struct CropInfo {
+    let imageSize: CGSize
+    var rotationAngle: CGFloat
+    private(set) var rotationCenter: CGPoint
+    var cropRect: CGRect
+    var scale: CGFloat
+    var cropSize: CGSize {
+        didSet {
+            print("\(#function) \(self.cropSize)")
+        }
+    }
+    
+    var isRotated: Bool {
+        return self.rotationAngle != 0.0
+    }
+    
+    public init(image: UIImage) {
+        let size = CGSize(width: image.size.width*image.scale, height: image.size.height*image.scale)
+        self.imageSize = size
+        self.cropRect = CGRect(origin: .zero, size: size)
+        self.rotationAngle = 0.0
+        self.rotationCenter = CGPoint(x: size.width/2.0, y: size.height/2)
+        self.scale = 1.0
+        self.cropSize = size
+    }
+
+    public mutating func setRotationCenter(_ center: CGPoint) {
+        
+        self.rotationCenter = center
+    }
+    
+    public func minimumScale() -> CGFloat {
+        guard self.isRotated else { return 1.0 }
+        let angle = abs(self.rotationAngle)
+        
+        let top = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: self.imageSize.width, y: 0), alp1: .pi/2+angle, alp2: -angle)
+        let left = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: 0, y: self.imageSize.height), alp1: angle, alp2: .pi/2-angle)
+        let distance = self.distance(p1: top, p2: left)
+        
+        let scale = distance/imageSize.height
+        print("\(#function) \(scale)")
+        return scale
+    }
+    
+    public func scrollViewInsets(size: CGSize) -> UIEdgeInsets {
+        guard self.isRotated else { return .zero }
+        let angle = abs(self.rotationAngle)
+        
+//        let scaleX = self.imageSize.width/self.cropSize.width
+//        let scaleY = self.imageSize.height/self.cropSize.height
+
+        let top = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: size.width, y: 0), alp1: .pi/2+angle, alp2: -angle)
+        let left = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: 0, y: size.height), alp1: angle, alp2: .pi/2-angle)
+        
+        print("Inset left: \(left.x)")
+        return UIEdgeInsets(top: top.y, left: left.x, bottom: 0, right: 0)
+    }
+    
+    private func distance(p1: CGPoint, p2: CGPoint) -> CGFloat {
+        return sqrt(pow(p2.x-p1.x, 2.0) + pow(p2.y-p1.y, 2.0))
+    }
+    
+    private func calculateTrianglePoint(p1: CGPoint, p2: CGPoint, alp1: CGFloat, alp2: CGFloat) -> CGPoint {
+        let x1 = p1.x; let y1 = p1.y;
+        let x2 = p2.x; let y2 = p2.y;
+        
+        let u = x2-x1; let v = y2-y1;
+        let a3 = sqrt(pow(u, 2)+pow(v, 2))
+        let alp3 = CGFloat.pi-alp1-alp2
+        let a2 = a3*sin(alp2)/sin(alp3)
+        let rhs1 = x1*u + y1*v + a2*a3*cos(alp1)
+        let rhs2 = y2*u - x2*v + a2*a3*sin(alp1)
+        let x3 = (1/pow(a3, 2)) * (u*rhs1 - v*rhs2)
+        let y3 = (1/pow(a3, 2)) * (v*rhs1 + u*rhs2)
+        return CGPoint(x: x3, y: y3)
+    }
+    
+    private func calculateTriangleSide(with s1: CGFloat, s2: CGFloat, alp1: CGFloat) -> CGFloat {
+        let c2 = pow(s1, 2) + pow(s2, 2) - 2*s1*s2*cos(alp1)
+        return sqrt(c2)
+    }
+}
+
 public protocol FACropPhotoViewControllerDelegate: NSObjectProtocol {
     func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, titleFor aspectRatio: FACropAspectRatio) -> String
     func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, didSetAspectRatio aspectRatio: FACropAspectRatio?)
@@ -107,11 +190,13 @@ public class FACropPhotoViewController: UIViewController {
     public private(set) var cropControl: FACropControl!
     private(set) var viewState: ViewState
     private(set) var contentView: UIView!
+    private(set) var scrollContentView: UIView!
     private(set) var controlsContentView: UIView!
     private(set) var imageContainerView: UIView!
     private(set) var scrollView: UIScrollView!
     private(set) var imageView: UIImageView!
     private(set) var aspectRatioControl: FAAspectRatioControl!
+    private(set) var cropInfo: CropInfo
     public var imageCropRect: CGRect {
 
         guard self.isViewLoaded else {
@@ -164,6 +249,7 @@ public class FACropPhotoViewController: UIViewController {
         self.image = image
         self.options = options
         self.viewState = ViewState.initial
+        self.cropInfo = CropInfo(image: image)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -203,13 +289,16 @@ public class FACropPhotoViewController: UIViewController {
         super.viewDidLoad()
         self.automaticallyAdjustsScrollViewInsets = false
 
-        let scrollView = UIScrollView(frame: self.contentView.bounds)
+        let scrollContentView = UIView(frame: self.contentView.bounds)
+        scrollContentView.autoresizingMask = [.flexibleWidth,. flexibleHeight]
+        let scrollView = UIScrollView(frame: scrollContentView.bounds)
         scrollView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         scrollView.delegate = self
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.alwaysBounceVertical = true
         scrollView.alwaysBounceHorizontal = true
+        scrollView.clipsToBounds = false
         if #available(iOS 11.0, *) {
             scrollView.contentInsetAdjustmentBehavior = .never
         }
@@ -217,7 +306,9 @@ public class FACropPhotoViewController: UIViewController {
             scrollView.observe(\.contentInset, options: [.initial,.new]) { [unowned self] (scrollView, _) in
             self.viewState.scrollViewInset = scrollView.contentInset
         }]
-        self.contentView.addSubview(scrollView)
+        scrollContentView.addSubview(scrollView)
+        self.contentView.addSubview(scrollContentView)
+        self.scrollContentView = scrollContentView
         self.scrollView = scrollView
         
         let imageView = UIImageView(image: self.image)
@@ -435,7 +526,7 @@ public class FACropPhotoViewController: UIViewController {
     
     @objc private func cropControlDidChangeAngle(_ angleControl: FARotationControl) {
         self.viewState.rotationAngle = angleControl.rotationAngel
-        print("Rotation angle: \(angleControl.rotationAngel)")
+        self.cropInfo.rotationAngle = angleControl.rotationAngel
         self.updateUI()
     }
     
@@ -546,19 +637,20 @@ public class FACropPhotoViewController: UIViewController {
         self.updateUI(animated: animated)
     }
     
-    private func calculateScrollViewInset(transform: CGAffineTransform) -> UIEdgeInsets {
-        print("inset scale: \(transform.a)")
-        let scale: CGFloat = transform.a
+    private func calculateScrollViewInset() -> UIEdgeInsets {
         let cropRect = self.cropControl.convert(self.cropControl.cropFrame, to: nil)
         let scrollRect = self.contentView.convert(self.scrollView.frame, to: nil)
-        let angle = abs(self.viewState.rotationAngle)
-        let additionalOffsetX = self.calculateTrianglePoint(with: CGPoint(x: 0, y: 0), p2: CGPoint(x: 0, y: cropRect.height), alp1: -angle, alp2: -(.pi/2-angle)).x / scale
-        let additionalOffsetY = self.calculateTrianglePoint(with: CGPoint(x: 0, y: 0), p2: CGPoint(x: cropRect.width, y: 0), alp1: angle, alp2: .pi/2-angle).y / scale
+//        let angle = abs(self.viewState.rotationAngle)
+//        let additionalOffsetX = self.calculateTrianglePoint(with: CGPoint(x: 0, y: 0), p2: CGPoint(x: 0, y: cropRect.height), alp1: -angle, alp2: -(.pi/2-angle)).x / scale
+//        let additionalOffsetY = self.calculateTrianglePoint(with: CGPoint(x: 0, y: 0), p2: CGPoint(x: cropRect.width, y: 0), alp1: angle, alp2: .pi/2-angle).y / scale
+        let rotateInsets = self.cropInfo.scrollViewInsets(size: cropRect.size)
+        let hInset = rotateInsets.left / self.image.scale / self.scrollView.minimumZoomScale
+        let vInset = rotateInsets.top / self.image.scale / self.scrollView.minimumZoomScale
 
-        let top = (cropRect.minY - scrollRect.minY) + additionalOffsetY
-        let left = (cropRect.minX - scrollRect.minX) + additionalOffsetX
-        let bottom = (scrollRect.maxY - cropRect.maxY) + additionalOffsetY
-        let right = (scrollRect.maxX - cropRect.maxX) + additionalOffsetX
+        let top = (cropRect.minY - scrollRect.minY) + vInset
+        let left = (cropRect.minX - scrollRect.minX) + hInset
+        let bottom = (scrollRect.maxY - cropRect.maxY) + vInset
+        let right = (scrollRect.maxX - cropRect.maxX) + hInset
         
         let insets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
         return insets
@@ -575,7 +667,9 @@ public class FACropPhotoViewController: UIViewController {
         
         if action.contains(.zoom) {
             let size = self.viewState.cropControlFrame.size
-            let minScale = self.imageView.bounds.size.scaleToFill(to: size)
+            var minScale = self.imageView.bounds.size.scaleToFill(to: size)
+            minScale *= self.cropInfo.minimumScale()
+
             if self.scrollView.minimumZoomScale != minScale {
                 self.scrollView.minimumZoomScale = minScale
             }
@@ -596,13 +690,12 @@ public class FACropPhotoViewController: UIViewController {
         }
 
         if action.contains(.rotate) {
+            let view = self.scrollContentView!
+            view.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
             let rotate = CGAffineTransform(rotationAngle: self.viewState.rotationAngle)
-            let scale = self.calculateScaleTransform(forAngle: self.viewState.rotationAngle,
-                                            size: self.viewState.cropControlFrame.size)
-            let transform = scale.concatenating(rotate)
-            let transform3D = CATransform3DMakeAffineTransform(transform)
-            if !CATransform3DEqualToTransform(self.imageView.layer.transform, transform3D) {
-                self.imageView.layer.transform = transform3D
+            let transform = rotate
+            if view.transform != transform {
+                view.transform = transform
             }
         }
 
@@ -613,9 +706,7 @@ public class FACropPhotoViewController: UIViewController {
         }
 
         if action.contains(.inset) {
-            let scale = self.calculateScaleTransform(forAngle: self.viewState.rotationAngle,
-                                                     size: self.viewState.cropControlFrame.size)
-            let contentInset = self.calculateScrollViewInset(transform: scale)
+            let contentInset = self.calculateScrollViewInset()
             if self.scrollView.contentInset != contentInset {
                 self.scrollView.contentInset = contentInset
             }
@@ -643,17 +734,6 @@ public class FACropPhotoViewController: UIViewController {
         let selector = #selector(self.alignCropAction)
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: selector, object: nil)
     }
-
-    private func calculateScaleTransform(forAngle angle: CGFloat, size: CGSize) -> CGAffineTransform {
-        let scale = 1.0 + abs(sin(angle))
-//        let width = size.width*cos(.pi/2 - angle)
-//        let height = size.height*cos(.pi/2 - angle)
-//        let side = max(size.width*cos(angle), size.height*sin(angle))
-//        let minSide = max(size.width, size.height)
-//        let scale = max(size.width/width, size.height/height)
-//        print("Scale from rotation: \(scale)")
-        return CGAffineTransform(scaleX: scale, y: scale)
-    }
     
     private func calculateTrianglePoint(with p1: CGPoint, p2: CGPoint, alp1: CGFloat, alp2: CGFloat) -> CGPoint {
         let x1 = p1.x; let y1 = p1.y;
@@ -673,6 +753,64 @@ public class FACropPhotoViewController: UIViewController {
     private func calculateTriangleSide(with s1: CGFloat, s2: CGFloat, alp1: CGFloat) -> CGFloat {
         let c2 = pow(s1, 2) + pow(s2, 2) - 2*s1*s2*cos(alp1)
         return sqrt(c2)
+    }
+    
+    private func createCroppedImage(from rawImage: UIImage, crop: CropInfo) -> UIImage? {
+        guard let cgImage = rawImage.cgImage else {
+            return nil
+        }
+        
+        /*/ Debug result
+         rule.angle = -Float.pi/4
+         rule.rotationCenter.left = 0.2
+         rule.rotationCenter.top = 0.2
+         rule.rect.left = 0.5
+         rule.rect.right = 1.0
+         rule.rect.top = 0.5
+         rule.rect.bottom = 1.0 */
+        
+        let bitmapSize = CGSize(width: cgImage.width, height: cgImage.height)
+        var result: CIImage = CIImage(cgImage: cgImage)
+        
+        do { // 1. Make rotation over rotation center
+            if crop.isRotated {
+                let size = bitmapSize
+                
+                let rotationPoint = crop.rotationCenter
+                let offset = CGPoint(x: size.width*rotationPoint.x, y: size.height-size.height*rotationPoint.y)
+                
+                let moveToZero = CGAffineTransform(translationX: -offset.x, y: -offset.y)
+                let rotation = CGAffineTransform(rotationAngle: CGFloat(crop.rotationAngle))
+                let moveToPoint = CGAffineTransform(translationX: offset.x, y: offset.y)
+                let transform = moveToZero.concatenating(rotation).concatenating(moveToPoint)
+                
+                let rotateExtent = CGRect(origin: .zero, size: bitmapSize)
+                result = result.transformed(by: transform).cropped(to: rotateExtent)
+            }
+        }
+        do { // 2. Make backgorund color
+            if crop.isRotated {
+                let bgColor = UIColor.black
+                let extent = CGRect(origin: .zero, size: bitmapSize)
+                let bgImage = CIImage(color: CIColor(color: bgColor)).cropped(to: extent)
+                result = result.composited(over: bgImage)
+            }
+        }
+        do { // 3. Crop image
+            do {
+                let cropRect = crop.cropRect
+                let move = CGAffineTransform(translationX: -cropRect.minX, y: -(bitmapSize.height - cropRect.maxY))
+                let cropExtent = CGRect(origin: .zero, size: cropRect.size)
+                result = result.transformed(by: move).cropped(to: cropExtent)
+            }
+        }
+        
+        guard let image = CIContext().createCGImage(result, from: result.extent) else {
+            return nil
+        }
+        
+        let output = UIImage(cgImage: image, scale: UIScreen.main.scale, orientation: .up)
+        return output
     }
 }
 
@@ -702,10 +840,23 @@ extension FACropPhotoViewController: UIScrollViewDelegate {
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         self.viewState.scrollViewOffset = scrollView.contentOffset
+        if self.cropInfo.isRotated {
+            let cropFrame = self.cropControl.cropFrame
+            let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
+            let rotationCenter = self.cropControl.convert(cropCenter, to: self.imageView).scale(self.image.scale)
+            self.cropInfo.setRotationCenter(rotationCenter)
+            self.updateUI(animated: false, options: [.inset])
+        }
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        self.viewState.scrollViewZoom = scrollView.zoomScale
+        let zoomScale = scrollView.zoomScale
+        let cropSize = self.cropControl.cropFrame.size.scale(self.image.scale/zoomScale)
+        self.viewState.scrollViewZoom = zoomScale
+        self.cropInfo.scale = zoomScale
+        self.cropInfo.cropSize = cropSize
+        self.updateUI(animated: false, options: [.inset])
+        print("Zoom: \(scrollView.zoomScale)")
     }
 }
 

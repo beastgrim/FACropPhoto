@@ -54,7 +54,7 @@ class ViewController: UIViewController {
     
     @objc func editAction(_ sender: Any?) {
         
-        if let image = UIImage(named: "img") {
+        if var image = UIImage(named: "img") {
             
 //            let ciImage = CIImage(image: image)!
 //            var image = UIImage(ciImage: ciImage)
@@ -64,7 +64,7 @@ class ViewController: UIViewController {
             options.controlsHeight = 44.0
 //            if scale {
 //                image = UIImage(ciImage: ciImage, scale: 2.0, orientation: .up)
-//                image = UIImage(cgImage: image.cgImage!, scale: 2.0, orientation: .up)
+                image = UIImage(cgImage: image.cgImage!, scale: UIScreen.main.scale, orientation: .up)
 //                self.cropVC?.image = image
 //            }
             if let cropVC = self.cropVC {
