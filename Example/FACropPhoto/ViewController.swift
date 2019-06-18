@@ -52,6 +52,13 @@ class ViewController: UIViewController {
         self.cropVC?.resetCropping(animated: true)
     }
     
+    @objc func export(_ sender: Any?) {
+        let image = self.cropVC!.createCroppedImage()
+        let cgImage = image.cgImage!
+        let size = CGSize(width: cgImage.width, height: cgImage.height)
+        print("\(image) \(size)")
+    }
+    
     @objc func editAction(_ sender: Any?) {
         
         if var image = UIImage(named: "img") {
@@ -68,13 +75,18 @@ class ViewController: UIViewController {
 //                self.cropVC?.image = image
 //            }
             if let cropVC = self.cropVC {
-                cropVC.initialCropRect = CGRect(x: 492.869598, y: 144.000397, width: 612.129272, height: 805.388732)
+                var cropInfo = CropInfo(image: image)
+                cropInfo.rotationAngle = .pi/4
+                cropInfo.cropSize = CGSize(width: 200, height: 200)
+                cropInfo.rotationCenter = CGPoint(x: 908, y: 526)
+                cropVC.setInitialCrop(cropInfo)
             }
             let vc = self.cropVC ?? FACropPhotoViewController(image: image, options: options)
 
             vc.navigationItem.rightBarButtonItems = [
                 UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),
-                UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(align(_:)))]
+                UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(align(_:))),
+                UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(export(_:)))]
             self.navigationController?.pushViewController(vc, animated: true)
             self.navigationController?.navigationBar.isTranslucent = false
             vc.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissAction(_:)))

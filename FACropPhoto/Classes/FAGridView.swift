@@ -12,8 +12,9 @@ public class FAGridView: UIView {
     
     struct Const {
         static var cornerSide: CGFloat = 24
-        static var cornerWidth: CGFloat = 3
+        static var cornerWidth: CGFloat = 4
         static var gridWidth: CGFloat = 1
+        static var padding: CGFloat = 3
     }
 
     let shapeLayer: CAShapeLayer
@@ -47,20 +48,21 @@ public class FAGridView: UIView {
         let size = rect.size
         let corner = Const.cornerSide
         let w = Const.cornerWidth/2
-        context.setLineWidth(4)
+        let p = Const.padding
+        context.setLineWidth(Const.cornerWidth)
         context.setStrokeColor(UIColor.white.cgColor)
-        context.move(to: CGPoint(x: w, y: corner+w))
-        context.addLine(to: CGPoint(x: w, y: w))
-        context.addLine(to: CGPoint(x: corner, y: w))
-        context.move(to: CGPoint(x: size.width-corner+w, y: w))
-        context.addLine(to: CGPoint(x: size.width-w, y: w))
-        context.addLine(to: CGPoint(x: size.width-w, y: corner))
-        context.move(to: CGPoint(x: size.width-w, y: size.height-corner-w))
-        context.addLine(to: CGPoint(x: size.width-w, y: size.height-w))
-        context.addLine(to: CGPoint(x: size.width-corner-w, y: size.height-w))
-        context.move(to: CGPoint(x: corner, y: size.height-w))
-        context.addLine(to: CGPoint(x: w, y: size.height-w))
-        context.addLine(to: CGPoint(x: w, y: size.height-corner-w))
+        context.move(to: CGPoint(x: w+p, y: corner+w+p))
+        context.addLine(to: CGPoint(x: w+p, y: w+p))
+        context.addLine(to: CGPoint(x: corner+p, y: w+p))
+        context.move(to: CGPoint(x: size.width-corner+w-p, y: w+p))
+        context.addLine(to: CGPoint(x: size.width-w-p, y: w+p))
+        context.addLine(to: CGPoint(x: size.width-w-p, y: corner+p))
+        context.move(to: CGPoint(x: size.width-w-p, y: size.height-corner-w-p))
+        context.addLine(to: CGPoint(x: size.width-w-p, y: size.height-w-p))
+        context.addLine(to: CGPoint(x: size.width-corner-w-p, y: size.height-w-p))
+        context.move(to: CGPoint(x: corner+p, y: size.height-w-p))
+        context.addLine(to: CGPoint(x: w+p, y: size.height-w-p))
+        context.addLine(to: CGPoint(x: w+p, y: size.height-corner-w-p))
         context.strokePath()
     }
     
