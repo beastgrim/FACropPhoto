@@ -24,12 +24,12 @@ public struct FACropPhotoOptions {
 }
 
 public struct CropInfo {
-    let imageSize: CGSize
-    var rotationAngle: CGFloat
-    var rotationCenter: CGPoint
-    var cropSize: CGSize
+    public let imageSize: CGSize
+    public var rotationAngle: CGFloat
+    public var rotationCenter: CGPoint
+    public var cropSize: CGSize
     
-    var isRotated: Bool {
+    public var isRotated: Bool {
         return self.rotationAngle != 0.0
     }
     
