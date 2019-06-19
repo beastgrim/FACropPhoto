@@ -25,18 +25,18 @@ public struct FACropPhotoOptions {
 
 public struct CropInfo {
     public let imageSize: CGSize
-    public var rotationAngle: CGFloat
-    public var rotationCenter: CGPoint {
-        didSet {
-            print("RotationCenter: \(rotationCenter)")
-        }
-    }
     public var cropSize: CGSize {
         didSet {
             print("CropSize: \(cropSize)")
         }
     }
-    
+    public var rotationCenter: CGPoint {
+        didSet {
+            print("RotationCenter: \(rotationCenter)")
+        }
+    }
+    public var rotationAngle: CGFloat
+
     public var isRotated: Bool {
         return self.rotationAngle != 0.0
     }
@@ -44,7 +44,7 @@ public struct CropInfo {
         let croppedRect = CGRect(x: (self.rotationCenter.x - self.cropSize.width/2),
                                  y: (self.rotationCenter.y - self.cropSize.height/2),
                                  width: self.cropSize.width,
-                                 height: self.imageSize.height)
+                                 height: self.cropSize.height)
         return croppedRect
     }
     

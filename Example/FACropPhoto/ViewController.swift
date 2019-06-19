@@ -32,6 +32,10 @@ class ViewController: UIViewController {
     @objc func dismissAction(_ sender: Any?) {
         let isCropped = self.cropVC!.isCropped
         print("Is cropped: \(isCropped)")
+        if isCropped {
+            let cropInfo = self.cropVC!.cropInfo
+            print("Cropinfo: \(cropInfo)")
+        }
         
         self.cropVC?.navigationController?.popViewController(animated: true)
         self.imageView?.image = self.cropVC?.createCroppedImage()
