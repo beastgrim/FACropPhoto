@@ -32,6 +32,13 @@ public struct CropInfo {
     public var isRotated: Bool {
         return self.rotationAngle != 0.0
     }
+    public var cropRect: CGRect {
+        let croppedRect = CGRect(x: (self.rotationCenter.x - self.cropSize.width/2),
+                                 y: (self.rotationCenter.y - self.cropSize.height/2),
+                                 width: self.cropSize.width,
+                                 height: self.imageSize.height)
+        return croppedRect
+    }
     
     public init(image: UIImage) {
         let size = CGSize(width: image.size.width*image.scale, height: image.size.height*image.scale)
