@@ -100,6 +100,7 @@ open class FARotationControl: UIControl {
     
     public func setDegreesImage(_ image: UIImage) {
         self.degreesImageView.image = image
+        self.degreesViewToBottomConstraint.constant = -image.size.height/2
     }
     
     

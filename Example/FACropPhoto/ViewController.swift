@@ -85,7 +85,13 @@ class ViewController: UIViewController {
                 cropInfo.rotationCenter = CGPoint(x: 908, y: 526)
                 cropVC.setInitialCrop(cropInfo)
             }
-            let vc = self.cropVC ?? FACropPhotoViewController(image: image, options: options)
+            var vc: FACropPhotoViewController! = self.cropVC
+            if vc == nil {
+                vc = FACropPhotoViewController(image: image, options: options)
+                vc.loadViewIfNeeded()
+                vc.rotateControl.setDegreesImage(UIImage(named: "rotate")!.withRenderingMode(.alwaysTemplate))
+                vc.rotateControl.degreesImageView.tintColor = .white
+            }
 
             vc.navigationItem.rightBarButtonItems = [
                 UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),
