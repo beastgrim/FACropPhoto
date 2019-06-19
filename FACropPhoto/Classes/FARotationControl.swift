@@ -12,8 +12,14 @@ open class FARotationControl: UIControl {
     public var rotationAngel: CGFloat = 0.0 {
         didSet {
             self.updateDegreesView()
-            let degrees = self.rotationAngel * 180 / .pi
-            self.textLabel.text = String(format: "%.01fº", degrees)
+            let degrees = abs(self.rotationAngel * 180 / .pi)
+            let sign = round(degrees) == 0.0 ? "" : (self.rotationAngel > 0 ? "+" : "-")
+            let degreesText = String(format: "%@%.0f", sign, degrees)
+            let degreesSign = "º"
+            let text = NSMutableAttributedString(string: degreesText, attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .medium)])
+            text.append(NSAttributedString(string: degreesSign, attributes: [.font: UIFont.systemFont(ofSize: 13, weight: .regular),
+                                                                             .baselineOffset: 5]))
+            self.textLabel.attributedText = text
         }
     }
     public let textLabel: UILabel = .init()
@@ -35,10 +41,11 @@ open class FARotationControl: UIControl {
         self.textLabel.textColor = .black
         self.textLabel.font = UIFont.systemFont(ofSize: 15)
         self.textLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.textLabel.textColor = UIColor.lightText
         self.addSubview(self.textLabel)
         NSLayoutConstraint.activate([
             self.textLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 2),
-            self.textLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor)
+            self.textLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: 3)
         ])
         
         self.notchImageView.translatesAutoresizingMaskIntoConstraints = false

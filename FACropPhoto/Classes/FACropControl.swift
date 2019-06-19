@@ -164,6 +164,7 @@ public class FACropControl: UIControl {
         UIView.animate(withDuration: FACropControl.Const.animationDuration, delay: 0, options: [.allowUserInteraction], animations: {
             self.effectView.effect = nil
             self.gridView.showGrid(true, animated: true)
+            self.rotateView.alpha = 0.0
         }) { (_) in }
     }
     
@@ -174,6 +175,7 @@ public class FACropControl: UIControl {
         UIView.animate(withDuration: FACropControl.Const.animationDuration, delay: 0, options: [.allowUserInteraction], animations: {
             self.effectView.effect = self.visualEffect
             self.gridView.showGrid(false, animated: true)
+            self.rotateView.alpha = 1.0
         }) { (_) in }
     }
     
@@ -489,7 +491,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
         let point = gestureRecognizer.location(in: self)
         let inset = Const.touchAreaWidth/2
 
-        if !self.rotateView.isHidden, self.rotateView.frame.contains(point) {
+        if !self.rotateView.isHidden, self.rotateView.alpha > 0.0, self.rotateView.frame.contains(point) {
             self.directions = []
             return true
         }
