@@ -187,6 +187,9 @@ public class FACropPhotoViewController: UIViewController {
     }
     public private(set) var standartControlsView: FAStandartControlsView?
     public private(set) var cropControl: FACropControl!
+    public var rotateControl: FARotationControl! {
+        return self.cropControl?.rotateView
+    }
     public private(set) var cropInfo: CropInfo
     private(set) var viewState: ViewState
     private(set) var contentView: UIView!
@@ -761,15 +764,6 @@ public class FACropPhotoViewController: UIViewController {
         guard let cgImage = rawImage.cgImage else {
             return nil
         }
-        
-        /*/ Debug result
-         rule.angle = -Float.pi/4
-         rule.rotationCenter.left = 0.2
-         rule.rotationCenter.top = 0.2
-         rule.rect.left = 0.5
-         rule.rect.right = 1.0
-         rule.rect.top = 0.5
-         rule.rect.bottom = 1.0 */
         
         let bitmapSize = CGSize(width: cgImage.width, height: cgImage.height)
         var result: CIImage = CIImage(cgImage: cgImage)
