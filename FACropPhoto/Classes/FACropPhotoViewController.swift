@@ -175,47 +175,17 @@ public class FACropPhotoViewController: UIViewController {
     private(set) var imageView: UIImageView!
     private(set) var aspectRatioControl: FAAspectRatioControl!
     private(set) var cropInfo: CropInfo
-    public var imageCropRect: CGRect {
-
-        guard self.isViewLoaded else {
-            return CGRect(origin: .zero, size: self.image.size)
-        }
-        
-        let inset = self.viewState.scrollViewInset
-        let zoomScale = self.viewState.scrollViewZoom
-        var imagePoint = self.viewState.scrollViewOffset
-        imagePoint.x += inset.left
-        imagePoint.y += inset.top
-        imagePoint.x /= zoomScale
-        imagePoint.y /= zoomScale
-        
-        var imageSize = self.viewState.cropControlFrame.size
-        imageSize.width /= zoomScale
-        imageSize.height /= zoomScale
-        
-        let cropRect = CGRect(origin: imagePoint, size: imageSize)
-        return cropRect
-    }
-    
-    public var imageBitmapCropRect: CGRect {
-        var rect = self.imageCropRect
-        let scale = self.image.scale
-        rect.size.width *= scale
-        rect.size.height *= scale
-        rect.origin.x *= scale
-        rect.origin.y *= scale
-        return rect
-    }
 
     public var isCropped: Bool {
         var isCropped = false
-        if let scrollView = self.scrollView {
-            isCropped = scrollView.zoomScale != scrollView.minimumZoomScale
+        if self.cropInfo.isRotated {
+            isCropped = true
         }
-        let imageRatio = self.image.size.width/self.image.size.height
-        let cropSize = self.viewState.cropControlFrame.size
-        let cropRatio = cropSize.width/cropSize.height
-        isCropped = isCropped || abs(imageRatio-cropRatio) > 0.00001
+        let size = CGSize(width: round(self.cropInfo.cropSize.width),
+                          height: round(self.cropInfo.cropSize.height))
+        if self.cropInfo.imageSize != size {
+            isCropped = true
+        }
         
         return isCropped
     }
