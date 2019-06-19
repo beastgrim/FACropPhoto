@@ -75,7 +75,7 @@ public class FACropControl: UIControl {
         static public var animationDuration: TimeInterval = 0.4
         static public var touchAreaWidth: CGFloat = 44
         static public var debounceTime: TimeInterval = 1.2
-        static public var cropInset: CGFloat = 15
+        static public var cropInset = UIEdgeInsets(top: 15, left: 15, bottom: 56, right: 15)
     }
 
     weak var delegate: FACropControlDelegate?
@@ -130,7 +130,7 @@ public class FACropControl: UIControl {
         self.rotateView = rotateControl
         
         let inset = Const.cropInset
-        self.maxCropFrame = self.bounds.insetBy(dx: inset, dy: inset)
+        self.maxCropFrame = self.bounds.inset(by: inset)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -144,7 +144,7 @@ public class FACropControl: UIControl {
         self.cropMaskView.setCropRect(self.cropFrame, animated: false)
         
         let inset = Const.cropInset
-        self.maxCropFrame = self.bounds.insetBy(dx: inset, dy: inset)
+        self.maxCropFrame = self.bounds.inset(by: inset)
     }
     
     
@@ -273,7 +273,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
         case .changed:
             let translation = sender.translation(in: self)
             let minSide: CGFloat = Const.touchAreaWidth*2.0
-            let inset: CGFloat = Const.cropInset
+            let inset: UIEdgeInsets = Const.cropInset
 
             let frame = self.gridView.frame
             var newFrame = self.startFrame
@@ -421,12 +421,12 @@ extension FACropControl: UIGestureRecognizerDelegate {
                     let newHeight = newFrame.height - translation.y
                     let newY = newFrame.minY + translation.y
                     if newHeight >= minSide {
-                        if newY >= inset {
+                        if newY >= inset.top {
                             newFrame.origin.y = newY
                             newFrame.size.height = min(newHeight, maxHeight)
                         } else {
-                            newFrame.origin.y = inset
-                            newFrame.size.height = min(newHeight + newY - inset, maxHeight)
+                            newFrame.origin.y = inset.top
+                            newFrame.size.height = min(newHeight + newY - inset.top, maxHeight)
                         }
                     } else {
                         newFrame.origin.y = frame.maxY - minSide
@@ -437,12 +437,12 @@ extension FACropControl: UIGestureRecognizerDelegate {
                     let newWidth = newFrame.width - translation.x
                     let newX = newFrame.minX + translation.x
                     if newWidth >= minSide {
-                        if newX >= inset {
+                        if newX >= inset.left {
                             newFrame.origin.x += translation.x
                             newFrame.size.width = min(newWidth, maxWidth)
                         } else {
-                            newFrame.origin.x = inset
-                            newFrame.size.width = min(newWidth + newX - inset, maxWidth)
+                            newFrame.origin.x = inset.left
+                            newFrame.size.width = min(newWidth + newX - inset.left, maxWidth)
                         }
                     } else {
                         newFrame.origin.x = frame.maxX - minSide
@@ -452,7 +452,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
                 if self.directions.contains(.bottom) {
                     let newHeight = newFrame.height + translation.y
                     if newHeight >= minSide {
-                        let maxHeight = self.bounds.height - newFrame.minY - inset
+                        let maxHeight = self.bounds.height - newFrame.minY - inset.bottom
                         newFrame.size.height = min(maxHeight, newHeight)
                     } else {
                         newFrame.size.height = minSide
@@ -461,7 +461,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
                 if self.directions.contains(.right) {
                     let newWidth = newFrame.width + translation.x
                     if newWidth >= minSide {
-                        let maxWidth = self.bounds.width - newFrame.minX - inset
+                        let maxWidth = self.bounds.width - newFrame.minX - inset.right
                         newFrame.size.width = min(maxWidth, newWidth)
                     } else {
                         newFrame.size.width = minSide
