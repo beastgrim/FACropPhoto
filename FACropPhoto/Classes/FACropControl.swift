@@ -89,7 +89,6 @@ public class FACropControl: UIControl {
     
     private(set) var cropFrame: CGRect = .zero
     private(set) var maxCropFrame: CGRect = .zero
-    private(set) var panGestureRecognizer: UIPanGestureRecognizer!
 
     
     // MARK: - Init
@@ -97,11 +96,6 @@ public class FACropControl: UIControl {
     override init(frame: CGRect) {
         
         super.init(frame: frame.extendTo(minSize: CGSize(width: 44, height: 44)))
-        
-        self.panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(panGestureAction(_:)))
-        self.panGestureRecognizer.maximumNumberOfTouches = 1
-        self.panGestureRecognizer.delegate = self
-        self.addGestureRecognizer(self.panGestureRecognizer)
         
         let effectView = UIVisualEffectView(frame: self.bounds)
         effectView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
@@ -255,7 +249,7 @@ public class FACropControl: UIControl {
 //MARK: - Gesture Recognizer Delegate
 extension FACropControl: UIGestureRecognizerDelegate {
 
-    @objc private func panGestureAction(_ sender: UIPanGestureRecognizer) {
+    @objc internal func panGestureAction(_ sender: UIPanGestureRecognizer) {
         
         switch sender.state {
   
@@ -491,7 +485,8 @@ extension FACropControl: UIGestureRecognizerDelegate {
         let point = gestureRecognizer.location(in: self)
         let inset = Const.touchAreaWidth/2
 
-        if !self.rotateView.isHidden, self.rotateView.alpha > 0.0, self.rotateView.frame.contains(point) {
+        if !self.rotateView.isHidden, self.rotateView.alpha > 0.0,
+            self.rotateView.frame.inset(by: UIEdgeInsets(top: inset, left: 0, bottom: 0, right: 0)).contains(point) {
             self.directions = []
             return true
         }

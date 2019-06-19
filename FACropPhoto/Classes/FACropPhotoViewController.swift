@@ -298,6 +298,7 @@ public class FACropPhotoViewController: UIViewController {
 
         let cropControl = FACropControl(frame: self.contentView.bounds)
         cropControl.delegate = self
+        cropControl.isUserInteractionEnabled = false
         cropControl.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         cropControl.addTarget(self, action: #selector(cropControlDidChangeValue(_:)), for: .valueChanged)
         cropControl.rotateView.addTarget(self, action: #selector(cropControlDidChangeAngle(_:)), for: .valueChanged)
@@ -320,9 +321,11 @@ public class FACropPhotoViewController: UIViewController {
             self.aspectRatioControl = aspectRatioControl
              */
         }
-
-        scrollView.addGestureRecognizer(cropControl.panGestureRecognizer)
-        cropControl.isUserInteractionEnabled = false
+        
+        let panGestureRecognizer = UIPanGestureRecognizer(target: self.cropControl, action: #selector(FACropControl.panGestureAction(_:)))
+        panGestureRecognizer.maximumNumberOfTouches = 1
+        panGestureRecognizer.delegate = self.cropControl
+        scrollView.addGestureRecognizer(panGestureRecognizer)
     }
     
     public override func viewWillAppear(_ animated: Bool) {
