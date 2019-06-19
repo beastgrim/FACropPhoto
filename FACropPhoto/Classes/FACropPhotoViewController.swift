@@ -166,6 +166,7 @@ public class FACropPhotoViewController: UIViewController {
     }
     public private(set) var standartControlsView: FAStandartControlsView?
     public private(set) var cropControl: FACropControl!
+    public private(set) var cropInfo: CropInfo
     private(set) var viewState: ViewState
     private(set) var contentView: UIView!
     private(set) var scrollContentView: UIView!
@@ -174,7 +175,6 @@ public class FACropPhotoViewController: UIViewController {
     private(set) var scrollView: UIScrollView!
     private(set) var imageView: UIImageView!
     private(set) var aspectRatioControl: FAAspectRatioControl!
-    private(set) var cropInfo: CropInfo
 
     public var isCropped: Bool {
         var isCropped = false
