@@ -26,8 +26,16 @@ public struct FACropPhotoOptions {
 public struct CropInfo {
     public let imageSize: CGSize
     public var rotationAngle: CGFloat
-    public var rotationCenter: CGPoint
-    public var cropSize: CGSize
+    public var rotationCenter: CGPoint {
+        didSet {
+            print("RotationCenter: \(rotationCenter)")
+        }
+    }
+    public var cropSize: CGSize {
+        didSet {
+            print("CropSize: \(cropSize)")
+        }
+    }
     
     public var isRotated: Bool {
         return self.rotationAngle != 0.0
@@ -49,7 +57,6 @@ public struct CropInfo {
     }
 
     public mutating func setRotationCenter(_ center: CGPoint) {
-        print("Rotation center: \(center)")
         self.rotationCenter = center
     }
     
@@ -76,6 +83,12 @@ public struct CropInfo {
         return UIEdgeInsets(top: top.y, left: left.x, bottom: top.y, right: left.x)
     }
     
+    public mutating func reset() {
+        self.cropSize = self.imageSize
+        self.rotationAngle = 0.0
+        self.rotationCenter = CGPoint(x: self.imageSize.width/2.0, y: self.imageSize.height/2)
+    }
+    
     private func distance(p1: CGPoint, p2: CGPoint) -> CGFloat {
         return sqrt(pow(p2.x-p1.x, 2.0) + pow(p2.y-p1.y, 2.0))
     }
@@ -99,6 +112,7 @@ public struct CropInfo {
         let c2 = pow(s1, 2) + pow(s2, 2) - 2*s1*s2*cos(alp1)
         return sqrt(c2)
     }
+
 }
 
 public protocol FACropPhotoViewControllerDelegate: NSObjectProtocol {
@@ -375,23 +389,27 @@ public class FACropPhotoViewController: UIViewController {
     public func resetCropping(animated: Bool = false) {
         
         let doBlock = {
-            self.scrollView?.isScrollEnabled = false
-            self.scrollView?.isScrollEnabled = true
             self.cropControl?.rotateView.rotationAngel = 0.0
             self.initialCropInfo = nil
             self.cropAspectRatio = nil
             self.viewState.aspectRatio = nil
             self.viewState.rotationAngle = 0.0
-            self.cropInfo.rotationAngle = 0.0
+            self.cropInfo.reset()
             self.setupScrollView(animated: animated)
             self.view.layoutIfNeeded()
         }
+//        self.scrollView?.delegate = nil
+        self.scrollView?.isScrollEnabled = false
         if animated {
-            UIView.animate(withDuration: FACropControl.Const.animationDuration) {
-                doBlock()
-            }
+            UIView.animate(withDuration: FACropControl.Const.animationDuration, animations: doBlock, completion:{ (_) in
+                self.cropInfo.reset()
+//                self.scrollView?.delegate = self
+                self.scrollView?.isScrollEnabled = true
+            })
         } else {
             doBlock()
+//            self.scrollView?.delegate = self
+            self.scrollView?.isScrollEnabled = true
         }
     }
     
@@ -488,6 +506,14 @@ public class FACropPhotoViewController: UIViewController {
 
     @objc private func cropControlDidChangeValue(_ cropControl: FACropControl) {
         self.viewState.cropControlFrame = cropControl.cropFrame
+        let zoomScale = self.scrollView.zoomScale
+        let cropSize = self.cropControl.cropFrame.size.scale(self.image.scale/zoomScale)
+        self.cropInfo.cropSize = cropSize
+        
+        let cropFrame = cropControl.cropFrame
+        let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
+        let rotationCenter = self.cropControl.convert(cropCenter, to: self.imageView).scale(self.image.scale)
+        self.cropInfo.setRotationCenter(rotationCenter)
 
         self.updateUI(animated: false, options: [.crop, .inset, .zoom])
     }
@@ -835,7 +861,6 @@ extension FACropPhotoViewController: UIScrollViewDelegate {
         
         self.cropInfo.cropSize = cropSize
         self.updateUI(animated: false, options: [.inset])
-        print("Zoom: \(scrollView.zoomScale)")
     }
 }
 
