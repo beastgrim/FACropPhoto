@@ -18,7 +18,7 @@ open class FARotationControl: UIControl {
             let degreesSign = "º"
             let text = NSMutableAttributedString(string: degreesText, attributes: [.font: UIFont.systemFont(ofSize: 15, weight: .medium)])
             text.append(NSAttributedString(string: degreesSign, attributes: [.font: UIFont.systemFont(ofSize: 13, weight: .regular),
-                                                                             .baselineOffset: 5]))
+                                                                             .baselineOffset: 3]))
             self.textLabel.attributedText = text
         }
     }

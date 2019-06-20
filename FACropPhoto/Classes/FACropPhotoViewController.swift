@@ -69,18 +69,18 @@ public struct CropInfo {
         let distance = self.distance(p1: top, p2: left)
         
         let scale = distance/imageSize.height
-//        print("\(#function) \(scale)")
         return scale
     }
     
     public func scrollViewInsets(size: CGSize) -> UIEdgeInsets {
         guard self.isRotated else { return .zero }
         let angle = abs(self.rotationAngle)
+        let w = size.width/2
+        let h = size.height/2
+        let res1 = w * cos(angle) + h * sin(angle) - w
+        let res2 = h * cos(angle) + w * sin(angle) - h
 
-        let top = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: size.width, y: 0), alp1: .pi/2+angle, alp2: -angle)
-        let left = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: 0, y: size.height), alp1: angle, alp2: .pi/2-angle)
-        
-        return UIEdgeInsets(top: top.y, left: left.x, bottom: top.y, right: left.x)
+        return UIEdgeInsets(top: -res2, left: -res1, bottom: -res2, right: -res1)
     }
     
     public mutating func reset() {
@@ -89,7 +89,7 @@ public struct CropInfo {
         self.rotationCenter = CGPoint(x: self.imageSize.width/2.0, y: self.imageSize.height/2)
     }
     
-    private func distance(p1: CGPoint, p2: CGPoint) -> CGFloat {
+    internal func distance(p1: CGPoint, p2: CGPoint) -> CGFloat {
         return sqrt(pow(p2.x-p1.x, 2.0) + pow(p2.y-p1.y, 2.0))
     }
     
@@ -273,6 +273,8 @@ public class FACropPhotoViewController: UIViewController {
         scrollView.alwaysBounceVertical = true
         scrollView.alwaysBounceHorizontal = true
         scrollView.clipsToBounds = false
+        scrollView.layer.borderWidth = 2
+        scrollView.layer.borderColor = UIColor.red.cgColor
         if #available(iOS 11.0, *) {
             scrollView.contentInsetAdjustmentBehavior = .never
         }
@@ -325,7 +327,11 @@ public class FACropPhotoViewController: UIViewController {
         let panGestureRecognizer = UIPanGestureRecognizer(target: self.cropControl, action: #selector(FACropControl.panGestureAction(_:)))
         panGestureRecognizer.maximumNumberOfTouches = 1
         panGestureRecognizer.delegate = self.cropControl
-        scrollView.addGestureRecognizer(panGestureRecognizer)
+        self.contentView.addGestureRecognizer(scrollView.panGestureRecognizer)
+        if let pinchGestureRecognizer = scrollView.pinchGestureRecognizer {
+            self.contentView.addGestureRecognizer(pinchGestureRecognizer)
+        }
+        self.contentView.addGestureRecognizer(panGestureRecognizer)
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -646,19 +652,18 @@ public class FACropPhotoViewController: UIViewController {
     }
     
     private func calculateScrollViewInset() -> UIEdgeInsets {
-        let cropRect = self.cropControl.convert(self.cropControl.cropFrame, to: nil)
-        let scrollRect = self.contentView.convert(self.scrollView.frame, to: nil)
-//        let angle = abs(self.viewState.rotationAngle)
-//        let additionalOffsetX = self.calculateTrianglePoint(with: CGPoint(x: 0, y: 0), p2: CGPoint(x: 0, y: cropRect.height), alp1: -angle, alp2: -(.pi/2-angle)).x / scale
-//        let additionalOffsetY = self.calculateTrianglePoint(with: CGPoint(x: 0, y: 0), p2: CGPoint(x: cropRect.width, y: 0), alp1: angle, alp2: .pi/2-angle).y / scale
-        let rotateInsets = self.cropInfo.scrollViewInsets(size: cropRect.size)
-        let hInset = rotateInsets.left / self.image.scale / self.scrollView.minimumZoomScale
-        let vInset = rotateInsets.top / self.image.scale / self.scrollView.minimumZoomScale
+        let cropRect = self.cropControl.cropFrame
+        let hOffset: CGFloat = (self.cropControl.bounds.width - cropRect.width)/2
+        let vOffset: CGFloat = (self.cropControl.bounds.height - cropRect.height)/2
 
-        let top = (cropRect.minY - scrollRect.minY) + vInset
-        let left = (cropRect.minX - scrollRect.minX) + hInset
-        let bottom = (scrollRect.maxY - cropRect.maxY) + vInset
-        let right = (scrollRect.maxX - cropRect.maxX) + hInset
+        let rotateInsets = self.cropInfo.scrollViewInsets(size: cropRect.size)
+        let hInset: CGFloat = rotateInsets.left
+        let vInset: CGFloat = rotateInsets.top
+
+        let top = vOffset + vInset
+        let left = hOffset + hInset
+        let bottom = vOffset + vInset
+        let right = hOffset + hInset
         
         let insets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
         return insets
@@ -711,6 +716,8 @@ public class FACropPhotoViewController: UIViewController {
             if !self.cropControl.cropFrame.equalTo(self.viewState.cropControlFrame) {
                 self.cropControl.setCropFrame(self.viewState.cropControlFrame, animated: animated)
             }
+            let cropFrame = self.cropControl.cropFrame
+            self.scrollContentView.center = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
         }
 
         if action.contains(.inset) {
