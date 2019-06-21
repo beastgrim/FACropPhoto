@@ -88,7 +88,10 @@ public class FACropControl: UIControl {
     }
     
     private(set) var cropFrame: CGRect = .zero
-    private(set) var maxCropFrame: CGRect = .zero
+    var maxCropFrame: CGRect {
+        let inset = Const.cropInset
+        return self.bounds.inset(by: inset)
+    }
 
     
     // MARK: - Init
@@ -122,9 +125,6 @@ public class FACropControl: UIControl {
         rotateControl.autoresizingMask = [.flexibleWidth,.flexibleTopMargin,.flexibleBottomMargin]
         self.addSubview(rotateControl)
         self.rotateView = rotateControl
-        
-        let inset = Const.cropInset
-        self.maxCropFrame = self.bounds.inset(by: inset)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -136,9 +136,6 @@ public class FACropControl: UIControl {
 
         self.cropMaskView.frame = self.bounds
         self.cropMaskView.setCropRect(self.cropFrame, animated: false)
-        
-        let inset = Const.cropInset
-        self.maxCropFrame = self.bounds.inset(by: inset)
     }
     
     
