@@ -25,16 +25,8 @@ public struct FACropPhotoOptions {
 
 public struct CropInfo {
     public let imageSize: CGSize
-    public var cropSize: CGSize {
-        didSet {
-            print("CropSize: \(cropSize)")
-        }
-    }
-    public var rotationCenter: CGPoint {
-        didSet {
-            print("RotationCenter: \(rotationCenter)")
-        }
-    }
+    public var cropSize: CGSize
+    public var rotationCenter: CGPoint
     public var rotationAngle: CGFloat
 
     public var isRotated: Bool {
@@ -150,8 +142,9 @@ public class FACropPhotoViewController: UIViewController {
         static let rotate = UpdateAction(rawValue: 1<<4)
         static let inset =  UpdateAction(rawValue: 1<<5)
         static let ratio =  UpdateAction(rawValue: 1<<6)
-        
-        static let all: UpdateAction = [.offset, .zoom, .crop, .size, .rotate, .inset, .ratio]
+        static let position = UpdateAction(rawValue: 1<<7)
+
+        static let all: UpdateAction = [.offset, .zoom, .crop, .size, .rotate, .inset, .ratio, .position]
     }
     
     struct Const {
@@ -273,8 +266,6 @@ public class FACropPhotoViewController: UIViewController {
         scrollView.alwaysBounceVertical = true
         scrollView.alwaysBounceHorizontal = true
         scrollView.clipsToBounds = false
-        scrollView.layer.borderWidth = 2
-        scrollView.layer.borderColor = UIColor.red.cgColor
         if #available(iOS 11.0, *) {
             scrollView.contentInsetAdjustmentBehavior = .never
         }
@@ -450,47 +441,58 @@ public class FACropPhotoViewController: UIViewController {
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: selector, object: nil)
         
         let doBlock = {
-            var cropSize = self.cropControl.cropFrame.size
-            let maxSize = self.cropControl.maxCropFrame.size
+            let cropInfo = self.cropInfo
             let inset = self.cropControl.maxCropFrame.origin
-            
-            let scale = cropSize.scaleToFit(to: maxSize)
-            if scale != 1.0 {
-                cropSize.width *= scale
-                cropSize.height *= scale
+            let cropMaxSize = CGSize(width: self.scrollView.bounds.width - inset.x*2,
+                                     height: self.scrollView.bounds.height - inset.y*2)
+            let scaleChange = self.cropControl.cropFrame.size.scaleToFit(to: cropMaxSize)
+            let newCropSize = CGSize(width: self.cropControl.cropFrame.size.width * scaleChange,
+                                     height: self.cropControl.cropFrame.size.height * scaleChange)
+
+            do { // Calculate crop control frame
+                let initialScale = newCropSize.scaleToFit(to: cropMaxSize)
+                let cropSize = newCropSize
+                
+                let size = CGSize(width: cropSize.width * initialScale,
+                                  height: cropSize.height * initialScale)
+                let origin = CGPoint(x: (cropMaxSize.width - size.width)/2,
+                                     y: (cropMaxSize.height - size.height)/2)
+                let initialCropFrame = CGRect(origin: origin, size: size).offsetBy(dx: inset.x, dy: inset.y)
+                
+                self.viewState.cropControlFrame = initialCropFrame
             }
-            
-            var scrollInsets = self.scrollView.contentInset
-            var imagePoint = self.scrollView.contentOffset
-            imagePoint.x += scrollInsets.left
-            imagePoint.y += scrollInsets.top
-            imagePoint.x /= self.scrollView.zoomScale
-            imagePoint.y /= self.scrollView.zoomScale
-            
-            let cropFrame = CGRect(x: (maxSize.width-cropSize.width)/2 + inset.x,
-                                   y: (maxSize.height-cropSize.height)/2 + inset.y,
-                                   width: cropSize.width,
-                                   height: cropSize.height)
-            
-            let newScale = self.viewState.scrollViewZoom*scale
-            self.viewState.scrollViewZoom = min(self.scrollView.maximumZoomScale, newScale)
-            self.viewState.cropControlFrame = cropFrame
+ 
+            do { // Calculate scroll view zoom
+                let minScale = self.imageView.bounds.size.scaleToFill(to: newCropSize) * self.cropInfo.minimumScale()
+                let maxScale = self.scrollView.maximumZoomScale
+                let newScale = min(maxScale, max(minScale, self.viewState.scrollViewZoom*scaleChange))
+                self.userZoom = newScale
+                self.viewState.scrollViewZoom = newScale
+                
+                self.updateUI(animated: animated, options: [.zoom])
+            }
+            do { // Caclulating scroll offset
+                self.cropInfo = cropInfo // Restore crop info after update zoom
+                let scale = self.viewState.scrollViewZoom
+                let imageScale = self.image.scale
+                let rotationCenter = self.cropInfo.rotationCenter
+                let cropSize = self.cropInfo.cropSize.scale(1.0/self.image.scale)
+
+                let cropFrame = self.viewState.cropControlFrame
+                
+                let cropOrigin = CGPoint(x: rotationCenter.x/imageScale - cropSize.width/2,
+                                         y: rotationCenter.y/imageScale - cropSize.height/2)
+                self.viewState.scrollViewOffset = CGPoint(x: -cropFrame.origin.x+cropOrigin.x*scale,
+                                                          y: -cropFrame.origin.y+cropOrigin.y*scale)
+            }
+   
             self.updateUI(animated: animated)
-            
-            scrollInsets = self.scrollView.contentInset
-            var offset = imagePoint
-            offset.x *= self.viewState.scrollViewZoom
-            offset.y *= self.viewState.scrollViewZoom
-            offset.x -= scrollInsets.left
-            offset.y -= scrollInsets.top
-            
-            self.viewState.scrollViewOffset = offset
-            self.updateUI(animated: animated)
-            
             self.view.layoutIfNeeded()
         }
         if animated {
-            UIView.animate(withDuration: FACropControl.Const.animationDuration, animations: doBlock)
+            UIView.animate(withDuration: FACropControl.Const.animationDuration, animations: doBlock, completion: { _ in
+                self.updateUI(animated: false)
+            })
         } else {
             doBlock()
         }
@@ -611,7 +613,7 @@ public class FACropPhotoViewController: UIViewController {
 
         if let initialCrop = self.initialCropInfo {
             let cropSize = initialCrop.cropSize.scale(1.0/self.image.scale)
-            let scale = self.image.scale
+            let imageScale = self.image.scale
             
             let initialScale = cropSize.scaleToFit(to: cropMaxSize)
             self.userZoom = initialScale
@@ -626,8 +628,8 @@ public class FACropPhotoViewController: UIViewController {
             initialCropFrame = initialCropFrame.offsetBy(dx: inset.x, dy: inset.y)
             self.viewState.cropControlFrame = initialCropFrame
 
-            let cropOrigin = CGPoint(x: initialCrop.rotationCenter.x/scale - cropSize.width/2,
-                                    y: initialCrop.rotationCenter.y/scale - cropSize.height/2)
+            let cropOrigin = CGPoint(x: initialCrop.rotationCenter.x/imageScale - cropSize.width/2,
+                                    y: initialCrop.rotationCenter.y/imageScale - cropSize.height/2)
             self.viewState.scrollViewOffset = CGPoint(x: -initialCropFrame.origin.x+cropOrigin.x*initialScale,
                                                       y: -initialCropFrame.origin.y+cropOrigin.y*initialScale)
         } else {
@@ -647,7 +649,7 @@ public class FACropPhotoViewController: UIViewController {
             self.viewState.rotationAngle = 0.0
         }
         
-        self.cropControl.rotateView.setRotationAngle(self.viewState.rotationAngle, animated: animated)
+        self.rotateControl.setRotationAngle(self.viewState.rotationAngle, animated: animated)
         self.updateUI(animated: animated)
     }
     
@@ -716,12 +718,22 @@ public class FACropPhotoViewController: UIViewController {
             if !self.cropControl.cropFrame.equalTo(self.viewState.cropControlFrame) {
                 self.cropControl.setCropFrame(self.viewState.cropControlFrame, animated: animated)
             }
+        }
+        
+        if action.contains(.position) {
             let cropFrame = self.cropControl.cropFrame
             self.scrollContentView.center = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
         }
 
         if action.contains(.inset) {
-            let contentInset = self.calculateScrollViewInset()
+            var contentInset = self.calculateScrollViewInset()
+            let cropFrame = self.cropControl.cropFrame
+            let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
+            let scrollCenter = self.scrollContentView.center
+            contentInset.left += (cropCenter.x - scrollCenter.x)
+            contentInset.right -= (cropCenter.x - scrollCenter.x)
+            contentInset.top += (cropCenter.y - scrollCenter.y)
+            contentInset.bottom -= (cropCenter.y - scrollCenter.y)
             if self.scrollView.contentInset != contentInset {
                 self.scrollView.contentInset = contentInset
             }
