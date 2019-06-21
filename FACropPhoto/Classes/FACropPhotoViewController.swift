@@ -55,12 +55,15 @@ public struct CropInfo {
     public func minimumScale() -> CGFloat {
         guard self.isRotated else { return 1.0 }
         let angle = abs(self.rotationAngle)
+        let size = self.imageSize
+        let minSide = min(size.width, size.height)
+        let maxSide = max(size.width, size.height)
         
-        let top = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: self.imageSize.width, y: 0), alp1: .pi/2+angle, alp2: -angle)
-        let left = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: 0, y: self.imageSize.height), alp1: angle, alp2: .pi/2-angle)
+        let top = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: maxSide, y: 0), alp1: .pi/2+angle, alp2: -angle)
+        let left = self.calculateTrianglePoint(p1: .zero, p2: CGPoint(x: 0, y: minSide), alp1: angle, alp2: .pi/2-angle)
         let distance = self.distance(p1: top, p2: left)
         
-        let scale = distance/imageSize.height
+        let scale = distance/minSide
         return scale
     }
     
