@@ -357,14 +357,19 @@ public class FACropPhotoViewController: UIViewController {
         if self.viewSize != self.view.bounds.size {
             self.viewSize = self.view.bounds.size
             
+            self.layoutSubviews()
             self.viewState.scrollViewSize = self.scrollView.bounds.size
             
             if self.isFirstAppear {
                 self.setupScrollView()
+                self.scrollViewDidZoom(self.scrollView)
             } else {
-                self.alignCropToCenter()
+                self.initialCropInfo = self.cropInfo
+                self.setupScrollView()
+                DispatchQueue.main.async {
+                    self.setupScrollView()
+                }
             }
-            self.scrollViewDidZoom(self.scrollView)
         }
     }
     
@@ -372,30 +377,7 @@ public class FACropPhotoViewController: UIViewController {
         if #available(iOS 11.0, *) {
             super.viewSafeAreaInsetsDidChange()
             
-            let insets = self.view.safeAreaInsets
-            self.controlsContentView.frame = self.view.bounds
-                .with(height: Const.controlsHeight, options: .bottom)
-                .offsetBy(dx: 0, dy: -insets.bottom)
-            self.contentView.frame = self.view.bounds
-                .croppedBy(y: insets.top)
-                .croppedBy(side: insets.bottom+self.options.controlsHeight, options: .bottom)
-            self.scrollContentView.transform = .identity
-            self.scrollContentView.frame = self.contentView.bounds
-            self.scrollView.frame = self.contentView.bounds
-            self.cropControl.frame = self.scrollView.frame
-            self.viewState.scrollViewSize = self.scrollView.bounds.size
-        }
-    }
-    
-    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        self.scrollView.delegate = nil
-        self.initialCropInfo = self.cropInfo
-        coordinator.animate(alongsideTransition: { (context) in
-            self.setupScrollView()
-        }) { (context) in
-            self.scrollView.delegate = self
-            self.alignCropToCenter()
+            self.layoutSubviews()
         }
     }
     
@@ -609,6 +591,7 @@ public class FACropPhotoViewController: UIViewController {
     private var swipeToBackGestureIsOn: Bool = false
     private var userZoom: CGFloat = 1.0
     private var viewSize: CGSize = .zero
+    private var isUserInteraction: Bool = false
     
     private func setupScrollView(animated: Bool = false) {
         
@@ -847,6 +830,25 @@ public class FACropPhotoViewController: UIViewController {
                             size: newCropSize)
         return result
     }
+    
+    private func layoutSubviews() {
+        
+        var insets: UIEdgeInsets = .zero
+        if #available(iOS 11.0, *) {
+            insets = self.view.safeAreaInsets
+        }
+        self.controlsContentView.frame = self.view.bounds
+            .with(height: Const.controlsHeight, options: .bottom)
+            .offsetBy(dx: 0, dy: -insets.bottom)
+        self.contentView.frame = self.view.bounds
+            .croppedBy(y: insets.top)
+            .croppedBy(side: insets.bottom+self.options.controlsHeight, options: .bottom)
+        self.scrollContentView.transform = .identity
+        self.scrollContentView.frame = self.contentView.bounds
+        self.scrollView.frame = self.contentView.bounds
+        self.cropControl.frame = self.scrollView.frame
+        self.viewState.scrollViewSize = self.scrollView.bounds.size
+    }
 }
 
 
@@ -858,20 +860,26 @@ extension FACropPhotoViewController: UIScrollViewDelegate {
     }
     
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.isUserInteraction = true
         self.disableAlign()
     }
     
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+        self.isUserInteraction = true
         self.disableAlign()
     }
     
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         self.debounceAlign()
+        if !decelerate {
+            self.isUserInteraction = false
+        }
     }
     
     public func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         self.debounceAlign()
         self.userZoom = scrollView.zoomScale
+        self.isUserInteraction = false
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -879,7 +887,9 @@ extension FACropPhotoViewController: UIScrollViewDelegate {
         let cropFrame = self.cropControl.cropFrame
         let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
         let rotationCenter = self.cropControl.convert(cropCenter, to: self.imageView).scale(self.image.scale)
-        self.cropInfo.setRotationCenter(rotationCenter)
+        if self.isUserInteraction {
+            self.cropInfo.setRotationCenter(rotationCenter)
+        }
         self.updateUI(animated: false, options: [.inset])
     }
     
@@ -888,8 +898,14 @@ extension FACropPhotoViewController: UIScrollViewDelegate {
         let cropSize = self.cropControl.cropFrame.size.scale(self.image.scale/zoomScale)
         self.viewState.scrollViewZoom = zoomScale
         
-        self.cropInfo.cropSize = cropSize
+        if self.isUserInteraction {
+            self.cropInfo.cropSize = cropSize
+        }
         self.updateUI(animated: false, options: [.inset])
+    }
+    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        self.isUserInteraction = false
     }
 }
 
