@@ -379,12 +379,25 @@ public class FACropPhotoViewController: UIViewController {
             self.contentView.frame = self.view.bounds
                 .croppedBy(y: insets.top)
                 .croppedBy(side: insets.bottom+self.options.controlsHeight, options: .bottom)
+            self.scrollContentView.transform = .identity
+            self.scrollContentView.frame = self.contentView.bounds
             self.scrollView.frame = self.contentView.bounds
             self.cropControl.frame = self.scrollView.frame
             self.viewState.scrollViewSize = self.scrollView.bounds.size
         }
     }
     
+    public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        self.scrollView.delegate = nil
+        self.initialCropInfo = self.cropInfo
+        coordinator.animate(alongsideTransition: { (context) in
+            self.setupScrollView()
+        }) { (context) in
+            self.scrollView.delegate = self
+            self.alignCropToCenter()
+        }
+    }
     
     // MARK: - Public
     
@@ -404,17 +417,15 @@ public class FACropPhotoViewController: UIViewController {
             self.setupScrollView(animated: animated)
             self.view.layoutIfNeeded()
         }
-//        self.scrollView?.delegate = nil
+
         self.scrollView?.isScrollEnabled = false
         if animated {
             UIView.animate(withDuration: FACropControl.Const.animationDuration, animations: doBlock, completion:{ (_) in
                 self.cropInfo.reset()
-//                self.scrollView?.delegate = self
                 self.scrollView?.isScrollEnabled = true
             })
         } else {
             doBlock()
-//            self.scrollView?.delegate = self
             self.scrollView?.isScrollEnabled = true
         }
     }
@@ -604,6 +615,8 @@ public class FACropPhotoViewController: UIViewController {
         let cropMaxSize = self.cropControl.maxCropFrame.size
 
         self.scrollView.minimumZoomScale = 0.0
+        self.scrollContentView.transform = .identity
+        self.scrollContentView.frame = self.contentView.bounds
 
         if let initialCrop = self.initialCropInfo {
             let cropSize = initialCrop.cropSize.scale(1.0/self.image.scale)
@@ -695,8 +708,7 @@ public class FACropPhotoViewController: UIViewController {
 
         if action.contains(.rotate) {
             let view = self.scrollContentView!
-            let rotate = CGAffineTransform(rotationAngle: self.viewState.rotationAngle)
-            let transform = rotate
+            let transform = CGAffineTransform(rotationAngle: self.viewState.rotationAngle)
             if view.transform != transform {
                 view.transform = transform
             }

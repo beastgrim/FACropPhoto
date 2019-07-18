@@ -42,6 +42,10 @@ class ViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
     
+    @objc func cancelAction(_ sender: Any?) {
+        self.cropVC?.navigationController?.popViewController(animated: true)
+    }
+    
     @objc func setRatio(_ sender: Any?) {
         
         let cases = AspectRatio.allCases
@@ -99,7 +103,10 @@ class ViewController: UIViewController {
                 UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(export(_:)))]
             self.navigationController?.pushViewController(vc, animated: true)
             self.navigationController?.navigationBar.isTranslucent = false
-            vc.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissAction(_:)))
+            vc.navigationItem.leftBarButtonItems = [
+                UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissAction(_:))),
+                UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelAction(_:)))
+            ]
             self.cropVC = vc
         }
     }
