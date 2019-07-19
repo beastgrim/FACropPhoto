@@ -67,6 +67,8 @@ public enum AspectRatio: CaseIterable {
 protocol FACropControlDelegate: NSObjectProtocol {
     func cropControlWillBeginDragging(_ cropControl: FACropControl)
     func cropControlDidEndDragging(_ cropControl: FACropControl)
+    func cropControlWillBeginRotating(_ cropControl: FACropControl)
+    func cropControlDidEndRotating(_ cropControl: FACropControl)
 }
 
 public class FACropControl: UIControl {
@@ -259,6 +261,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
             self.startFrame = self.gridView.frame
             if self.directions == [] {
                 self.rotateView.panGestureAction(sender)
+                self.delegate?.cropControlWillBeginRotating(self)
             } else {
                 self.disableBlur()
                 self.delegate?.cropControlWillBeginDragging(self)
@@ -470,6 +473,7 @@ extension FACropControl: UIGestureRecognizerDelegate {
         case .ended, .cancelled, .failed:
             if self.directions == [] {
                 self.rotateView.panGestureAction(sender)
+                self.delegate?.cropControlDidEndRotating(self)
             } else {
                 self.delegate?.cropControlDidEndDragging(self)
                 self.splashBlure()
