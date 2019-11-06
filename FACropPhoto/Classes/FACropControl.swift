@@ -14,10 +14,13 @@ public enum AspectRatio: CaseIterable {
 
     case custom(ratio: CGFloat)
     case r1x1
+    case r2x1
     case r3x4
     case r2x3
     case r9x16
     case r4x3
+    case r4x5
+    case r5x4
     case r3x2
     case r16x9
     
@@ -27,6 +30,8 @@ public enum AspectRatio: CaseIterable {
             return ratio
         case .r1x1:
             return 1.0
+        case .r2x1:
+            return 2/1
         case .r2x3:
             return 2/3
         case .r3x4:
@@ -35,6 +40,10 @@ public enum AspectRatio: CaseIterable {
             return 9/16
         case .r4x3:
             return 4/3
+        case .r4x5:
+            return 4/5
+        case .r5x4:
+            return 5/4
         case .r3x2:
             return 3/2
         case .r16x9:
@@ -48,6 +57,8 @@ public enum AspectRatio: CaseIterable {
             return ""
         case .r1x1:
             return "1:1"
+        case .r2x1:
+            return "2:1"
         case .r2x3:
             return "2:3"
         case .r3x4:
@@ -56,6 +67,10 @@ public enum AspectRatio: CaseIterable {
             return "9:16"
         case .r4x3:
             return "4:3"
+        case .r4x5:
+            return "4:5"
+        case .r5x4:
+            return "5:4"
         case .r3x2:
             return "3:2"
         case .r16x9:
