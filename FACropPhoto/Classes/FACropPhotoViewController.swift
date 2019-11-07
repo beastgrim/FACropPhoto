@@ -113,6 +113,7 @@ public struct CropInfo {
 public protocol FACropPhotoViewControllerDelegate: NSObjectProtocol {
     func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, titleFor aspectRatio: FACropAspectRatio) -> String
     func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, didSetAspectRatio aspectRatio: FACropAspectRatio?)
+    func cropPhotoViewController(_ cropPhotoViewController: FACropPhotoViewController, didChangeUserInteraction isUserInteraction: Bool)
 }
 
 public class FACropPhotoViewController: UIViewController {
@@ -604,7 +605,11 @@ public class FACropPhotoViewController: UIViewController {
     private var swipeToBackGestureIsOn: Bool = false
     private var userZoom: CGFloat = 1.0
     private var viewSize: CGSize = .zero
-    private var isUserInteraction: Bool = false
+    private(set) var isUserInteraction: Bool = false {
+        didSet {
+            self.delegate?.cropPhotoViewController(self, didChangeUserInteraction: self.isUserInteraction)
+        }
+    }
     
     private func setupScrollView(animated: Bool = false) {
         
