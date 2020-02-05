@@ -609,7 +609,6 @@ public class FACropPhotoViewController: UIViewController {
     private(set) var isUserInteraction: Bool = false {
         didSet {
             self.delegate?.cropPhotoViewController(self, didChangeUserInteraction: self.isUserInteraction)
-            print("\(#function) \(self.isUserInteraction)")
         }
     }
     
