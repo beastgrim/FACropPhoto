@@ -605,9 +605,11 @@ public class FACropPhotoViewController: UIViewController {
     private var swipeToBackGestureIsOn: Bool = false
     private var userZoom: CGFloat = 1.0
     private var viewSize: CGSize = .zero
+    private var scrollViewWaitingForDecelerationComplete: Bool = false
     private(set) var isUserInteraction: Bool = false {
         didSet {
             self.delegate?.cropPhotoViewController(self, didChangeUserInteraction: self.isUserInteraction)
+            print("\(#function) \(self.isUserInteraction)")
         }
     }
     
@@ -878,52 +880,81 @@ extension FACropPhotoViewController: UIScrollViewDelegate {
     }
     
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(scrollViewDidEndScrolling), object: nil)
         self.isUserInteraction = true
         self.disableAlign()
     }
     
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+        
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(scrollViewDidEndScrolling), object: nil)
         self.isUserInteraction = true
         self.disableAlign()
     }
     
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        self.debounceAlign()
-        if !decelerate {
-            self.isUserInteraction = false
+
+        if decelerate == false {
+            self.scrollViewWaitingForDecelerationComplete = true
+            self.perform(#selector(scrollViewDidEndScrolling), with: nil, afterDelay: 0.1)
         }
     }
     
     public func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-        self.debounceAlign()
+
         self.userZoom = scrollView.zoomScale
-        self.isUserInteraction = false
+        self.scrollViewWaitingForDecelerationComplete = true
+        self.perform(#selector(scrollViewDidEndScrolling), with: nil, afterDelay: 0.1)
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+
         self.viewState.scrollViewOffset = scrollView.contentOffset
-        let cropFrame = self.cropControl.cropFrame
-        let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
-        let rotationCenter = self.cropControl.convert(cropCenter, to: self.imageView).scale(self.image.scale)
-        if self.isUserInteraction {
-            self.cropInfo.setRotationCenter(rotationCenter)
+        
+        if self.scrollViewWaitingForDecelerationComplete {
+            NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(scrollViewDidEndScrolling), object: nil)
+            self.perform(#selector(scrollViewDidEndScrolling), with: nil, afterDelay: 0.1)
         }
-        self.updateUI(animated: false, options: [.inset])
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        let zoomScale = scrollView.zoomScale
-        let cropSize = self.cropControl.cropFrame.size.scale(self.image.scale/zoomScale)
-        self.viewState.scrollViewZoom = zoomScale
-        
-        if self.isUserInteraction {
-            self.cropInfo.cropSize = cropSize
+
+        if self.scrollViewWaitingForDecelerationComplete {
+            NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(scrollViewDidEndScrolling), object: nil)
+            self.perform(#selector(scrollViewDidEndScrolling), with: nil, afterDelay: 0.1)
         }
-        self.updateUI(animated: false, options: [.inset])
+
+        let zoomScale = scrollView.zoomScale
+        self.viewState.scrollViewZoom = zoomScale
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        self.isUserInteraction = false
+        
+        self.scrollViewWaitingForDecelerationComplete = true
+        self.perform(#selector(scrollViewDidEndScrolling), with: nil, afterDelay: 0.1)
+    }
+    
+    @objc
+    private func scrollViewDidEndScrolling() {
+        
+        if self.isUserInteraction {
+            
+            // update zoom
+            let zoomScale = scrollView.zoomScale
+            let cropSize = self.cropControl.cropFrame.size.scale(self.image.scale/zoomScale)
+            self.cropInfo.cropSize = cropSize
+            // update center
+            let cropFrame = self.cropControl.cropFrame
+            let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
+            let rotationCenter = self.cropControl.convert(cropCenter, to: self.imageView).scale(self.image.scale)
+            self.cropInfo.setRotationCenter(rotationCenter)
+            
+            self.debounceAlign()
+            self.isUserInteraction = false
+        }
+        self.updateUI(animated: false, options: [.inset])
+        self.scrollViewWaitingForDecelerationComplete = false
     }
 }
 
