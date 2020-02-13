@@ -966,16 +966,18 @@ extension FACropPhotoViewController: FACropControlDelegate {
     }
     
     func cropControlDidEndDragging(_ cropControl: FACropControl) {
-        self.debounceAlign()
-        self.isUserInteraction = false
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(scrollViewDidEndScrolling), object: nil)
+        self.scrollViewDidEndScrolling()
     }
     
     func cropControlWillBeginRotating(_ cropControl: FACropControl) {
         self.isUserInteraction = true
+        self.disableAlign()
     }
     
     func cropControlDidEndRotating(_ cropControl: FACropControl) {
-        self.isUserInteraction = false
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(scrollViewDidEndScrolling), object: nil)
+        self.scrollViewDidEndScrolling()
     }
 }
 
