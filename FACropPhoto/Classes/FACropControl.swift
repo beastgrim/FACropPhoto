@@ -188,10 +188,10 @@ public class FACropControl: UIControl {
     }
     
     public func setCropFrame(_ cropFrame: CGRect, animated: Bool = false) {
-        
         var frame = cropFrame
         if !self.maxCropFrame.contains(cropFrame) {
             frame = self.maxCropFrame.intersection(cropFrame)
+            print("Warning: \(#function) invalid crop rect \(cropFrame)")
         }
         self.cropFrame = frame
         
@@ -209,15 +209,17 @@ public class FACropControl: UIControl {
     public func setAspectRatio(_ aspectRatio: CGFloat, animated: Bool = false) {
 
         let doBlock = {
-            let size = self.maxCropFrame.size
+            let maxCropFrame = self.maxCropFrame
+            let maxSize = maxCropFrame.size
             let ratio = aspectRatio
-            var height = min(self.maxCropFrame.height, size.width/ratio)
-            let width = min(self.maxCropFrame.width, height*ratio)
+            var height = min(maxSize.height, maxSize.width/ratio)
+            let width = min(maxSize.width, height*ratio)
             height = width/ratio
 
-            let point = CGPoint(x: self.bounds.midX-width/2,
-                                       y: self.bounds.midY-height/2)
-            let cropFrame = CGRect(origin: point, size: CGSize(width: width, height: height))
+            let resultSize = CGSize(width: width, height: height)
+            let resultPoint = CGPoint(x: maxCropFrame.midX - resultSize.width / 2,
+                                      y: maxCropFrame.midY - resultSize.height / 2)
+            let cropFrame = CGRect(origin: resultPoint, size: resultSize)
 
             self.setCropFrame(cropFrame, animated: animated)
             self.sendActions(for: .valueChanged)
