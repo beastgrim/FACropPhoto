@@ -19,7 +19,7 @@ public struct FACropPhotoOptions {
     
     public init() {
         self.showControls = false
-        self.controlsHeight = 0.0
+        self.controlsHeight = 44.0
     }
 }
 
@@ -151,9 +151,6 @@ public class FACropPhotoViewController: UIViewController {
         static let all: UpdateAction = [.offset, .zoom, .crop, .size, .rotate, .inset, .ratio, .position]
     }
     
-    struct Const {
-        static var controlsHeight: CGFloat = 44.0
-    }
     public private(set) var initialCropInfo: CropInfo?
     public var image: UIImage {
         didSet {
@@ -857,7 +854,7 @@ public class FACropPhotoViewController: UIViewController {
             insets = self.view.safeAreaInsets
         }
         self.controlsContentView.frame = self.view.bounds
-            .with(height: Const.controlsHeight, options: .bottom)
+            .with(height: self.options.controlsHeight, options: .bottom)
             .offsetBy(dx: 0, dy: -insets.bottom)
         self.contentView.frame = self.view.bounds
             .croppedBy(y: insets.top)
