@@ -423,8 +423,6 @@ public class FACropPhotoViewController: UIViewController {
             self.viewState.aspectRatio = ratio
         }
         self.cropControl?.setAspectRatio(ratioValue, animated: animated)
-        self.alignCropToCenter(animated: animated)
-        self.updateUI(animated: false, options: .ratio)
         
         if let scrollView = self.scrollView {
             // update center
@@ -438,6 +436,8 @@ public class FACropPhotoViewController: UIViewController {
             let cropSize = self.cropControl.cropFrame.size.scale(self.image.scale/zoomScale)
             self.cropInfo.cropSize = cropSize
         }
+        self.alignCropToCenter(animated: animated)
+        self.updateUI(animated: false, options: .ratio)
     }
     
     public func alignCropToCenter(animated: Bool = false) {
