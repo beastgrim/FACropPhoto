@@ -82,20 +82,20 @@ class ViewController: UIViewController {
                 image = UIImage(cgImage: image.cgImage!, scale: UIScreen.main.scale, orientation: .up)
 //                self.cropVC?.image = image
 //            }
-            if let cropVC = self.cropVC {
-                var cropInfo = CropInfo(image: image)
-                cropInfo.rotationAngle = .pi/4
-                cropInfo.cropSize = CGSize(width: 200, height: 200)
-                cropInfo.rotationCenter = CGPoint(x: 908, y: 526)
-                cropVC.setInitialCrop(cropInfo)
-            }
+//            if let cropVC = self.cropVC {
+//                var cropInfo = CropInfo(image: image)
+//                cropInfo.rotationAngle = .pi/4
+//                cropInfo.cropSize = CGSize(width: 200, height: 200)
+//                cropInfo.rotationCenter = CGPoint(x: 908, y: 526)
+//                cropVC.setInitialCrop(cropInfo)
+//            }
             var vc: FACropPhotoViewController! = self.cropVC
-            if vc == nil {
+//            if vc == nil {
                 vc = FACropPhotoViewController(image: image, options: options)
                 vc.loadViewIfNeeded()
                 vc.rotateControl.setDegreesImage(UIImage(named: "rotate")!.withRenderingMode(.alwaysTemplate))
                 vc.rotateControl.degreesImageView.tintColor = .white
-            }
+//            }
 
             vc.navigationItem.rightBarButtonItems = [
                 UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(setRatio(_:))),

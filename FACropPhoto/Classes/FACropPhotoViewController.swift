@@ -165,7 +165,7 @@ public class FACropPhotoViewController: UIViewController {
                 if (size != newValue.size || scale != newValue.scale) {
                     
                     self.scrollView.zoomScale = 1.0
-                    self.imageContainerView.frame.size = newSize
+                    self.scrollView.contentView.frame.size = newSize
                     self.scrollView.contentSize = newSize
                     self.setupScrollView()
                 }
@@ -187,13 +187,11 @@ public class FACropPhotoViewController: UIViewController {
     public private(set) var cropInfo: CropInfo
     private(set) var viewState: ViewState
     private(set) var contentView: UIView!
-    private(set) var scrollContentView: UIView!
     private(set) var controlsContentView: UIView!
-    private(set) var imageContainerView: UIView!
-    private(set) var scrollView: UIScrollView!
+    private(set) var scrollView: FARotationScrollView!
     private(set) var imageView: UIImageView!
     private(set) var aspectRatioControl: FAAspectRatioControl!
-
+    
     public var isCropped: Bool {
         var isCropped = false
         if self.cropInfo.isRotated {
@@ -256,40 +254,26 @@ public class FACropPhotoViewController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         self.automaticallyAdjustsScrollViewInsets = false
-
-        let scrollContentView = UIView(frame: self.contentView.bounds)
-        scrollContentView.autoresizingMask = [.flexibleWidth,. flexibleHeight]
-        let scrollView = UIScrollView(frame: scrollContentView.bounds)
-        scrollView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        
+        let scrollView = FARotationScrollView(frame: self.contentView.bounds)
+        scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         scrollView.delegate = self
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.alwaysBounceVertical = true
-        scrollView.alwaysBounceHorizontal = true
-        scrollView.clipsToBounds = false
-        if #available(iOS 11.0, *) {
-            scrollView.contentInsetAdjustmentBehavior = .never
-        }
         self.observations += [
-            scrollView.observe(\.contentInset, options: [.initial,.new]) { [unowned self] (scrollView, _) in
+            scrollView.scrollView.observe(\.contentInset, options: [.initial, .new]) { [unowned self] (scrollView, _) in
             self.viewState.scrollViewInset = scrollView.contentInset
         }]
-        scrollContentView.addSubview(scrollView)
-        self.contentView.addSubview(scrollContentView)
-        self.scrollContentView = scrollContentView
+        self.contentView.addSubview(scrollView)
         self.scrollView = scrollView
         
         let imageView = UIImageView(image: self.image)
         imageView.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        imageView.autoresizingMask = [.flexibleWidth,.flexibleHeight]
+        imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         scrollView.contentSize = imageView.sizeThatFits(.zero)
         scrollView.maximumZoomScale = 10.0
-        let imageContainer = UIView(frame: imageView.bounds)
-        imageContainer.addSubview(imageView)
+        scrollView.contentView.frame = imageView.bounds
+        scrollView.contentView.addSubview(imageView)
         self.imageView = imageView
-        scrollView.addSubview(imageContainer)
-        self.imageContainerView = imageContainer
-
+        
         let cropControl = FACropControl(frame: self.contentView.bounds)
         cropControl.delegate = self
         cropControl.isUserInteractionEnabled = false
@@ -319,8 +303,8 @@ public class FACropPhotoViewController: UIViewController {
         let panGestureRecognizer = UIPanGestureRecognizer(target: self.cropControl, action: #selector(FACropControl.panGestureAction(_:)))
         panGestureRecognizer.maximumNumberOfTouches = 1
         panGestureRecognizer.delegate = self.cropControl
-        self.contentView.addGestureRecognizer(scrollView.panGestureRecognizer)
-        if let pinchGestureRecognizer = scrollView.pinchGestureRecognizer {
+        self.contentView.addGestureRecognizer(scrollView.scrollView.panGestureRecognizer)
+        if let pinchGestureRecognizer = scrollView.scrollView.pinchGestureRecognizer {
             self.contentView.addGestureRecognizer(pinchGestureRecognizer)
         }
         self.contentView.addGestureRecognizer(panGestureRecognizer)
@@ -360,7 +344,7 @@ public class FACropPhotoViewController: UIViewController {
             
             if self.isFirstAppear {
                 self.setupScrollView()
-                self.scrollViewDidZoom(self.scrollView)
+                self.scrollViewDidZoom(self.scrollView.scrollView)
             } else {
                 self.initialCropInfo = self.cropInfo
                 self.setupScrollView()
@@ -614,9 +598,9 @@ public class FACropPhotoViewController: UIViewController {
         let cropMaxSize = self.cropControl.maxCropFrame.size
 
         self.scrollView.minimumZoomScale = 0.0
-        self.scrollContentView.transform = .identity
-        self.scrollContentView.frame = self.contentView.bounds
-
+        self.scrollView.transform = .identity
+        self.scrollView.frame = self.contentView.bounds
+        
         if let initialCrop = self.initialCropInfo {
             let cropSize = initialCrop.cropSize.scale(1.0/self.image.scale)
 
@@ -706,13 +690,9 @@ public class FACropPhotoViewController: UIViewController {
         }
 
         if action.contains(.rotate) {
-            let view = self.scrollContentView!
-            let transform = CGAffineTransform(rotationAngle: self.viewState.rotationAngle)
-            if view.transform != transform {
-                view.transform = transform
-            }
+            self.scrollView.rotationAngle = self.viewState.rotationAngle
         }
-
+        
         if action.contains(.crop) {
             if !self.cropControl.cropFrame.equalTo(self.viewState.cropControlFrame) {
                 self.cropControl.setCropFrame(self.viewState.cropControlFrame, animated: animated)
@@ -721,14 +701,14 @@ public class FACropPhotoViewController: UIViewController {
         
         if action.contains(.position) {
             let cropFrame = self.cropControl.cropFrame
-            self.scrollContentView.center = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
+            self.scrollView.center = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
         }
 
         if action.contains(.inset) {
             var contentInset = self.calculateScrollViewInset()
             let cropFrame = self.cropControl.cropFrame
             let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
-            let scrollCenter = self.scrollContentView.center
+            let scrollCenter = self.scrollView.center
             contentInset.left += (cropCenter.x - scrollCenter.x)
             contentInset.right -= (cropCenter.x - scrollCenter.x)
             contentInset.top += (cropCenter.y - scrollCenter.y)
@@ -859,8 +839,8 @@ public class FACropPhotoViewController: UIViewController {
         self.contentView.frame = self.view.bounds
             .croppedBy(y: insets.top)
             .croppedBy(side: insets.bottom+self.options.controlsHeight, options: .bottom)
-        self.scrollContentView.transform = .identity
-        self.scrollContentView.frame = self.contentView.bounds
+        self.scrollView.transform = .identity
+        self.scrollView.frame = self.contentView.bounds
         self.scrollView.frame = self.contentView.bounds
         self.cropControl.frame = self.scrollView.frame
         self.viewState.scrollViewSize = self.scrollView.bounds.size
@@ -872,7 +852,7 @@ public class FACropPhotoViewController: UIViewController {
 extension FACropPhotoViewController: UIScrollViewDelegate {
 
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return self.imageContainerView
+        return self.scrollView.contentView
     }
     
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
