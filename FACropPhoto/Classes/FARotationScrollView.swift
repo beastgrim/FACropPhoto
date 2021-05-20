@@ -41,10 +41,30 @@ public extension FARotationScrollView {
         get { self.scrollView.contentInset }
         set { self.scrollView.contentInset = newValue }
     }
+    var scrollViewSize: CGSize {
+        get { self.scrollView.frame.size }
+        set { self.scrollView.frame.size = newValue }
+    }
+}
+
+private extension FARotationScrollView {
+    var realContentSize: CGSize {
+        var contentSize = self.contentSize
+        contentSize.width /= self.zoomScale
+        contentSize.height /= self.zoomScale
+        return contentSize
+    }
+    var cropInfo: CropInfo {
+        var cropInfo = CropInfo(size: self.realContentSize)
+        cropInfo.rotationAngle = self.rotationAngle
+        return cropInfo
+    }
 }
 
 public class FARotationScrollView: UIView {
     public var rotationAngle: CGFloat = 0 { didSet { self.rotationAngleDidChange() } }
+    public var cropFrame: CGRect = .zero
+    
     public let scrollView: UIScrollView = .init()
     public let contentView: UIView = .init()
     
@@ -56,6 +76,48 @@ public class FARotationScrollView: UIView {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.commonInit()
+    }
+    
+    // MARK: - Public
+    public func set(frame: CGRect) {
+        let angle = self.rotationAngle
+        self.rotationAngle = 0
+        self.frame = frame
+        self.scrollView.frame = self.bounds
+        self.rotationAngle = angle
+    }
+    
+    public func updateMinimumZoomScale() {
+        let cropSize = self.cropFrame.size
+        let contentSize = self.realContentSize
+        
+        var minScale = contentSize.scaleToFill(to: cropSize)
+        minScale *= self.cropInfo.minimumScale()
+        
+        if self.minimumZoomScale != minScale {
+            self.minimumZoomScale = minScale
+        }
+    }
+    
+    public func updateContentInset() {
+        var contentInset = self.calculateScrollViewInset()
+        let cropFrame = self.cropFrame
+        let cropCenter = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
+        let scrollCenter = self.center
+        contentInset.left += (cropCenter.x - scrollCenter.x)
+        contentInset.right -= (cropCenter.x - scrollCenter.x)
+        contentInset.top += (cropCenter.y - scrollCenter.y)
+        contentInset.bottom -= (cropCenter.y - scrollCenter.y)
+        
+        if self.contentInset != contentInset {
+            self.contentInset = contentInset
+        }
+        // Fix bug scollView when set zero inset
+        if self.scrollView.zoomScale == self.scrollView.minimumZoomScale,
+            self.scrollView.contentOffset == .zero {
+            let inset = self.scrollView.contentInset
+            self.scrollView.contentOffset = CGPoint(x: -inset.left, y: -inset.top)
+        }
     }
     
     // MARK: - Private
@@ -82,5 +144,24 @@ public class FARotationScrollView: UIView {
         if self.transform != transform {
             self.transform = transform
         }
+    }
+    
+    private func calculateScrollViewInset() -> UIEdgeInsets {
+        let cropRect = self.cropFrame
+        let bounds = self.scrollView.bounds
+        let hOffset: CGFloat = (bounds.width - cropRect.width) / 2
+        let vOffset: CGFloat = (bounds.height - cropRect.height) / 2
+        
+        let rotateInsets = self.cropInfo.scrollViewInsets(size: cropRect.size)
+        let hInset: CGFloat = rotateInsets.left
+        let vInset: CGFloat = rotateInsets.top
+        
+        let top = vOffset + vInset
+        let left = hOffset + hInset
+        let bottom = vOffset + vInset
+        let right = hOffset + hInset
+        
+        let insets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
+        return insets
     }
 }
