@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5C1AE58D21AC0807003BC95E /* FAAspectRatioControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */; };
 		5C1AE58F21AC2272003BC95E /* FAStandartControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */; };
+		5C4AC3CD265955AD00D0168F /* FACropInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4AC3CC265955AB00D0168F /* FACropInfo.swift */; };
 		5C80C7D221AD3C7000408261 /* FAGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C80C7D121AD3C7000408261 /* FAGridView.swift */; };
 		5CD116EC26566E97001ACA11 /* FARotationScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CD116EB26566E97001ACA11 /* FARotationScrollView.swift */; };
 		5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */; };
@@ -39,6 +40,7 @@
 		4331CC432BFC3D774E0CABEC /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAAspectRatioControl.swift; sourceTree = "<group>"; };
 		5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAStandartControlsView.swift; sourceTree = "<group>"; };
+		5C4AC3CC265955AB00D0168F /* FACropInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FACropInfo.swift; sourceTree = "<group>"; };
 		5C80C7D121AD3C7000408261 /* FAGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAGridView.swift; sourceTree = "<group>"; };
 		5CD116EB26566E97001ACA11 /* FARotationScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FARotationScrollView.swift; sourceTree = "<group>"; };
 		5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropControl.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 				5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */,
 				5C80C7D121AD3C7000408261 /* FAGridView.swift */,
 				5CD116EB26566E97001ACA11 /* FARotationScrollView.swift */,
+				5C4AC3CC265955AB00D0168F /* FACropInfo.swift */,
 			);
 			name = Classes;
 			path = ../../FACropPhoto/Classes;
@@ -273,6 +276,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5CDCFBE321A6AF5700DD97AB /* CGRect+Helpers.swift in Sources */,
+				5C4AC3CD265955AD00D0168F /* FACropInfo.swift in Sources */,
 				84633C7521A8B933004A38DB /* FAMaskView.swift in Sources */,
 				5C1AE58F21AC2272003BC95E /* FAStandartControlsView.swift in Sources */,
 				5C1AE58D21AC0807003BC95E /* FAAspectRatioControl.swift in Sources */,

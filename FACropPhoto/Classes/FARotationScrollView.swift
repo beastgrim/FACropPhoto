@@ -54,11 +54,6 @@ private extension FARotationScrollView {
         contentSize.height /= self.zoomScale
         return contentSize
     }
-    var cropInfo: CropInfo {
-        var cropInfo = CropInfo(size: self.realContentSize)
-        cropInfo.rotationAngle = self.rotationAngle
-        return cropInfo
-    }
 }
 
 public class FARotationScrollView: UIView {
@@ -88,11 +83,7 @@ public class FARotationScrollView: UIView {
     }
     
     public func updateMinimumZoomScale() {
-        let cropSize = self.cropFrame.size
-        let contentSize = self.realContentSize
-        
-        var minScale = contentSize.scaleToFill(to: cropSize)
-        minScale *= self.cropInfo.minimumScale()
+        let minScale = FACropInfo.minimumScale(cropSize: self.cropFrame.size, fullSize: self.realContentSize, angleInRadians: self.rotationAngle)
         
         if self.minimumZoomScale != minScale {
             self.minimumZoomScale = minScale
@@ -152,7 +143,7 @@ public class FARotationScrollView: UIView {
         let hOffset: CGFloat = (bounds.width - cropRect.width) / 2
         let vOffset: CGFloat = (bounds.height - cropRect.height) / 2
         
-        let rotateInsets = self.cropInfo.scrollViewInsets(size: cropRect.size)
+        let rotateInsets = FACropInfo.scrollViewInsets(size: cropRect.size, angleInRadians: self.rotationAngle)
         let hInset: CGFloat = rotateInsets.left
         let vInset: CGFloat = rotateInsets.top
         
