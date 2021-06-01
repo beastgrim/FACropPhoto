@@ -577,6 +577,10 @@ public class FACropPhotoViewController: UIViewController {
             }
         }
         
+        if action.contains(.rotate) {
+            self.scrollView.rotationAngle = self.viewState.rotationAngle
+        }
+        
         if action.contains(.zoom) {
             self.scrollView.cropFrame = self.viewState.cropControlFrame
             self.scrollView.updateMinimumZoomScale()
@@ -596,10 +600,6 @@ public class FACropPhotoViewController: UIViewController {
             if self.scrollView.contentOffset != contentOffset {
                 self.scrollView.contentOffset = contentOffset
             }
-        }
-        
-        if action.contains(.rotate) {
-            self.scrollView.rotationAngle = self.viewState.rotationAngle
         }
         
         if action.contains(.crop) {
