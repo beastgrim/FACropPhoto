@@ -7,8 +7,6 @@
 //
 
 import UIKit
-//import FACropPhoto
-
 
 class ViewController: UIViewController {
 

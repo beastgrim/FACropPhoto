@@ -7,23 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5C1AE58D21AC0807003BC95E /* FAAspectRatioControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */; };
-		5C1AE58F21AC2272003BC95E /* FAStandartControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */; };
-		5C4AC3CD265955AD00D0168F /* FACropInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C4AC3CC265955AB00D0168F /* FACropInfo.swift */; };
-		5C80C7D221AD3C7000408261 /* FAGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C80C7D121AD3C7000408261 /* FAGridView.swift */; };
-		5CD116EC26566E97001ACA11 /* FARotationScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CD116EB26566E97001ACA11 /* FARotationScrollView.swift */; };
-		5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */; };
-		5CDCFBE221A6AF5700DD97AB /* FACropPhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */; };
-		5CDCFBE321A6AF5700DD97AB /* CGRect+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */; };
-		5CDCFBE521A6B5B300DD97AB /* FARotationControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDCFBE421A6B5B300DD97AB /* FARotationControl.swift */; };
+		5CDA82D226669B1F00C919D4 /* FACropControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82C726669B1F00C919D4 /* FACropControl.swift */; };
+		5CDA82D326669B1F00C919D4 /* UIImage+Icons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82C826669B1F00C919D4 /* UIImage+Icons.swift */; };
+		5CDA82D426669B1F00C919D4 /* FARotationControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82C926669B1F00C919D4 /* FARotationControl.swift */; };
+		5CDA82D526669B1F00C919D4 /* FAAspectRatioControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82CA26669B1F00C919D4 /* FAAspectRatioControl.swift */; };
+		5CDA82D626669B1F00C919D4 /* FAStandartControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82CB26669B1F00C919D4 /* FAStandartControlsView.swift */; };
+		5CDA82D726669B1F00C919D4 /* FAMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82CC26669B1F00C919D4 /* FAMaskView.swift */; };
+		5CDA82D826669B1F00C919D4 /* FACropPhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82CD26669B1F00C919D4 /* FACropPhotoViewController.swift */; };
+		5CDA82D926669B1F00C919D4 /* CGRect+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82CE26669B1F00C919D4 /* CGRect+Helpers.swift */; };
+		5CDA82DA26669B1F00C919D4 /* FARotationScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82CF26669B1F00C919D4 /* FARotationScrollView.swift */; };
+		5CDA82DB26669B1F00C919D4 /* FACropInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82D026669B1F00C919D4 /* FACropInfo.swift */; };
+		5CDA82DC26669B1F00C919D4 /* FAGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDA82D126669B1F00C919D4 /* FAGridView.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
-		84633C7521A8B933004A38DB /* FAMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84633C7421A8B933004A38DB /* FAMaskView.swift */; };
-		84F2F6CE21AA01F700BF56E7 /* UIImage+Icons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F2F6CD21AA01F700BF56E7 /* UIImage+Icons.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,15 +38,18 @@
 
 /* Begin PBXFileReference section */
 		4331CC432BFC3D774E0CABEC /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
-		5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAAspectRatioControl.swift; sourceTree = "<group>"; };
-		5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAStandartControlsView.swift; sourceTree = "<group>"; };
-		5C4AC3CC265955AB00D0168F /* FACropInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FACropInfo.swift; sourceTree = "<group>"; };
-		5C80C7D121AD3C7000408261 /* FAGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAGridView.swift; sourceTree = "<group>"; };
-		5CD116EB26566E97001ACA11 /* FARotationScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FARotationScrollView.swift; sourceTree = "<group>"; };
-		5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropControl.swift; sourceTree = "<group>"; };
-		5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropPhotoViewController.swift; sourceTree = "<group>"; };
-		5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGRect+Helpers.swift"; sourceTree = "<group>"; };
-		5CDCFBE421A6B5B300DD97AB /* FARotationControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FARotationControl.swift; sourceTree = "<group>"; };
+		5CDA82C726669B1F00C919D4 /* FACropControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropControl.swift; sourceTree = "<group>"; };
+		5CDA82C826669B1F00C919D4 /* UIImage+Icons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+Icons.swift"; sourceTree = "<group>"; };
+		5CDA82C926669B1F00C919D4 /* FARotationControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FARotationControl.swift; sourceTree = "<group>"; };
+		5CDA82CA26669B1F00C919D4 /* FAAspectRatioControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FAAspectRatioControl.swift; sourceTree = "<group>"; };
+		5CDA82CB26669B1F00C919D4 /* FAStandartControlsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FAStandartControlsView.swift; sourceTree = "<group>"; };
+		5CDA82CC26669B1F00C919D4 /* FAMaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FAMaskView.swift; sourceTree = "<group>"; };
+		5CDA82CD26669B1F00C919D4 /* FACropPhotoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropPhotoViewController.swift; sourceTree = "<group>"; };
+		5CDA82CE26669B1F00C919D4 /* CGRect+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGRect+Helpers.swift"; sourceTree = "<group>"; };
+		5CDA82CF26669B1F00C919D4 /* FARotationScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FARotationScrollView.swift; sourceTree = "<group>"; };
+		5CDA82D026669B1F00C919D4 /* FACropInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FACropInfo.swift; sourceTree = "<group>"; };
+		5CDA82D126669B1F00C919D4 /* FAGridView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FAGridView.swift; sourceTree = "<group>"; };
+		5CDA82DE26669B9E00C919D4 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* FACropPhoto_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FACropPhoto_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -58,9 +61,7 @@
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		83E95F6668A8EC21C0FEB6AF /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		84633C7421A8B933004A38DB /* FAMaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAMaskView.swift; sourceTree = "<group>"; };
-		84F2F6CD21AA01F700BF56E7 /* UIImage+Icons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Icons.swift"; sourceTree = "<group>"; };
-		A3DDD988E9CF121EC9BB7BD3 /* FACropPhoto.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = FACropPhoto.podspec; path = ../FACropPhoto.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		A3DDD988E9CF121EC9BB7BD3 /* FACropPhoto.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = FACropPhoto.podspec; path = ../FACropPhoto.podspec; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,30 +82,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		5CDCFBDB21A6AF5700DD97AB /* Classes */ = {
+		5CDA82C626669B1F00C919D4 /* FACropPhoto */ = {
 			isa = PBXGroup;
 			children = (
-				5CDCFBDE21A6AF5700DD97AB /* FACropPhotoViewController.swift */,
-				5CDCFBDC21A6AF5700DD97AB /* FACropControl.swift */,
-				5CDCFBE421A6B5B300DD97AB /* FARotationControl.swift */,
-				5CDCFBDF21A6AF5700DD97AB /* CGRect+Helpers.swift */,
-				84633C7421A8B933004A38DB /* FAMaskView.swift */,
-				84F2F6CD21AA01F700BF56E7 /* UIImage+Icons.swift */,
-				5C1AE58C21AC0807003BC95E /* FAAspectRatioControl.swift */,
-				5C1AE58E21AC2272003BC95E /* FAStandartControlsView.swift */,
-				5C80C7D121AD3C7000408261 /* FAGridView.swift */,
-				5CD116EB26566E97001ACA11 /* FARotationScrollView.swift */,
-				5C4AC3CC265955AB00D0168F /* FACropInfo.swift */,
+				5CDA82C726669B1F00C919D4 /* FACropControl.swift */,
+				5CDA82C826669B1F00C919D4 /* UIImage+Icons.swift */,
+				5CDA82C926669B1F00C919D4 /* FARotationControl.swift */,
+				5CDA82CA26669B1F00C919D4 /* FAAspectRatioControl.swift */,
+				5CDA82CB26669B1F00C919D4 /* FAStandartControlsView.swift */,
+				5CDA82CC26669B1F00C919D4 /* FAMaskView.swift */,
+				5CDA82CD26669B1F00C919D4 /* FACropPhotoViewController.swift */,
+				5CDA82CE26669B1F00C919D4 /* CGRect+Helpers.swift */,
+				5CDA82CF26669B1F00C919D4 /* FARotationScrollView.swift */,
+				5CDA82D026669B1F00C919D4 /* FACropInfo.swift */,
+				5CDA82D126669B1F00C919D4 /* FAGridView.swift */,
 			);
-			name = Classes;
-			path = ../../FACropPhoto/Classes;
+			name = FACropPhoto;
+			path = ../Sources/FACropPhoto;
 			sourceTree = "<group>";
 		};
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
+				5CDA82DE26669B9E00C919D4 /* Package.swift */,
+				5CDA82C626669B1F00C919D4 /* FACropPhoto */,
+				607FACD21AFB9204008FA782 /* Example */,
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
-				607FACD21AFB9204008FA782 /* Example for FACropPhoto */,
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
 			);
@@ -119,19 +122,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		607FACD21AFB9204008FA782 /* Example for FACropPhoto */ = {
+		607FACD21AFB9204008FA782 /* Example */ = {
 			isa = PBXGroup;
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
-				5CDCFBDB21A6AF5700DD97AB /* Classes */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
-			name = "Example for FACropPhoto";
-			path = FACropPhoto;
+			name = Example;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		607FACD31AFB9204008FA782 /* Supporting Files */ = {
@@ -275,19 +277,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5CDCFBE321A6AF5700DD97AB /* CGRect+Helpers.swift in Sources */,
-				5C4AC3CD265955AD00D0168F /* FACropInfo.swift in Sources */,
-				84633C7521A8B933004A38DB /* FAMaskView.swift in Sources */,
-				5C1AE58F21AC2272003BC95E /* FAStandartControlsView.swift in Sources */,
-				5C1AE58D21AC0807003BC95E /* FAAspectRatioControl.swift in Sources */,
-				5CDCFBE021A6AF5700DD97AB /* FACropControl.swift in Sources */,
+				5CDA82D226669B1F00C919D4 /* FACropControl.swift in Sources */,
+				5CDA82DC26669B1F00C919D4 /* FAGridView.swift in Sources */,
+				5CDA82D726669B1F00C919D4 /* FAMaskView.swift in Sources */,
+				5CDA82DB26669B1F00C919D4 /* FACropInfo.swift in Sources */,
+				5CDA82D626669B1F00C919D4 /* FAStandartControlsView.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
-				5CDCFBE221A6AF5700DD97AB /* FACropPhotoViewController.swift in Sources */,
-				5C80C7D221AD3C7000408261 /* FAGridView.swift in Sources */,
-				5CDCFBE521A6B5B300DD97AB /* FARotationControl.swift in Sources */,
-				84F2F6CE21AA01F700BF56E7 /* UIImage+Icons.swift in Sources */,
-				5CD116EC26566E97001ACA11 /* FARotationScrollView.swift in Sources */,
+				5CDA82D526669B1F00C919D4 /* FAAspectRatioControl.swift in Sources */,
+				5CDA82D926669B1F00C919D4 /* CGRect+Helpers.swift in Sources */,
+				5CDA82D326669B1F00C919D4 /* UIImage+Icons.swift in Sources */,
+				5CDA82DA26669B1F00C919D4 /* FARotationScrollView.swift in Sources */,
+				5CDA82D426669B1F00C919D4 /* FARotationControl.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
+				5CDA82D826669B1F00C919D4 /* FACropPhotoViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,7 +439,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = N33586GXQE;
-				INFOPLIST_FILE = FACropPhoto/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
@@ -454,7 +456,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = B72DDTPBC3;
-				INFOPLIST_FILE = FACropPhoto/Info.plist;
+				INFOPLIST_FILE = Sources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
